@@ -121,19 +121,18 @@ export function Login({
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
       {/* Dynamic gradient background with Apple Vision Pro style */}
-      <div className="absolute inset-0 backdrop-blur-sm">
+      <div className="absolute inset-0">
         {/* Animated mesh gradient */}
         <div 
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 opacity-60"
           style={{
             background: `
-              radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(200, 200, 200, 0.12) 0%, transparent 50%),
-              radial-gradient(circle at 40% 80%, rgba(180, 180, 180, 0.18) 0%, transparent 50%),
-              radial-gradient(circle at 0% 0%, rgba(220, 220, 220, 0.10) 0%, transparent 50%),
-              radial-gradient(circle at 80% 100%, rgba(160, 160, 160, 0.14) 0%, transparent 50%)
-            `,
-            filter: 'blur(8px)'
+              radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.8) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 113, 92, 0.6) 0%, transparent 50%),
+              radial-gradient(circle at 40% 80%, rgba(162, 89, 255, 0.7) 0%, transparent 50%),
+              radial-gradient(circle at 0% 0%, rgba(255, 206, 84, 0.5) 0%, transparent 50%),
+              radial-gradient(circle at 80% 100%, rgba(72, 187, 120, 0.6) 0%, transparent 50%)
+            `
           }}
         ></div>
         
@@ -152,90 +151,89 @@ export function Login({
       {/* Main content - Two column layout */}
       <div className="relative z-10 min-h-screen grid grid-cols-1 lg:grid-cols-2">
         {/* Left column - Complete login section */}
-        <div className="flex items-center justify-center p-6 lg:p-12 relative">
-          <div className="w-full max-w-lg relative z-10">            
+        <div className="flex items-center justify-center p-6 lg:p-12">
+          <div className="w-full max-w-md">
+            {/* Header */}
+            <HeaderLogin
+              title="Acceso Rápido"
+            />
+            
             {/* Vision Pro style card */}
             <div className="relative group w-full">
-              {/* Depth layers for Apple Vision Pro effect */}
-              <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] scale-[1.02] opacity-40 group-hover:scale-[1.03] transition-all duration-700"></div>
-              <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-2xl rounded-[2rem] scale-[1.01] opacity-60 group-hover:scale-[1.02] transition-all duration-500"></div>
+            {/* Depth layers for Apple Vision Pro effect */}
+            <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] scale-[1.02] opacity-40 group-hover:scale-[1.03] transition-all duration-700"></div>
+            <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-2xl rounded-[2rem] scale-[1.01] opacity-60 group-hover:scale-[1.02] transition-all duration-500"></div>
+            
+            <div 
+              className="relative bg-white/[0.05] backdrop-blur-xl rounded-[2rem] p-10 border border-white/[0.08] group-hover:border-white/[0.12] transition-all duration-500"
+              style={{
+                boxShadow: `
+                  0 0 0 1px rgba(255, 255, 255, 0.05),
+                  0 16px 32px rgba(0, 0, 0, 0.4),
+                  0 8px 16px rgba(0, 0, 0, 0.2),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                  inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+                `
+              }}
+            >
+              {/* Subtle internal glow */}
+              <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-60 pointer-events-none"></div>
               
-              <div 
-                className="relative bg-white/[0.05] backdrop-blur-xl rounded-[2rem] p-8 border border-white/[0.08] group-hover:border-white/[0.12] transition-all duration-500"
-                style={{
-                  boxShadow: `
-                    0 0 0 1px rgba(255, 255, 255, 0.05),
-                    0 16px 32px rgba(0, 0, 0, 0.4),
-                    0 8px 16px rgba(0, 0, 0, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    inset 0 -1px 0 rgba(0, 0, 0, 0.1)
-                  `
-                }}
-              >
-                {/* Subtle internal glow */}
-                <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-60 pointer-events-none"></div>
-                
-                <div className="relative z-10">
-                  {/* Header inside the box */}
-                  <HeaderLogin
-                    title="Inicio/Registro"
-                  />
-                  
-                  {message && (
-                    <div className="mb-6">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-2xl rounded-3xl"></div>
-                        <div className="relative p-6 rounded-3xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border border-blue-500/20">
-                          <p className="text-center text-base font-light text-blue-100 leading-relaxed">{message}</p>
-                        </div>
+              <div className="relative z-10">
+                {message && (
+                  <div className="mb-8">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-2xl rounded-3xl"></div>
+                      <div className="relative p-6 rounded-3xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border border-blue-500/20">
+                        <p className="text-center text-base font-light text-blue-100 leading-relaxed">{message}</p>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="space-y-5">
-                    {otpSent ? (
-                      <>
-                        {mode === "signphone" ? (
-                          <VerificationCode
-                            verificationCode={verificationCode}
-                            setVerificationCode={setVerificationCode}
-                            onSubmit={handleVerifyOTP}
-                            onResend={handleResendOTP}
-                          />
-                        ) : (
-                          <VerificationCode
-                            verificationCode={verificationCode}
-                            setVerificationCode={setVerificationCode}
-                            onSubmit={handleVerifyOTPEmail}
-                            onResend={handleResendOTPEmail}
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {mode === "signphone" ? (
-                          <PhoneLoginForm
-                            onSubmit={handleLogin}
-                            value={phoneNumber}
-                            onChange={setPhoneNumber}
-                          />
-                        ) : (
-                          <EmailLoginForm
-                            onSubmit={handleLoginEmail}
-                            initialEmail={email}
-                            loading={loading}
-                          />
-                        )}
-                      </>
-                    )}
                   </div>
-                  
-                  {/* Legal disclaimer - Vision Pro style */}
-                  <div className="mt-8 pt-6">
-                    <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-8"></div>
-                    <div className="opacity-60 hover:opacity-80 transition-opacity duration-300">
-                      <LegalDisclaimer />
-                    </div>
+                )}
+                
+                <div className="space-y-6">
+            {otpSent ? (
+              <>
+                {mode === "signphone" ? (
+                  <VerificationCode
+                    verificationCode={verificationCode}
+                    setVerificationCode={setVerificationCode}
+                    onSubmit={handleVerifyOTP}
+                    onResend={handleResendOTP}
+                  />
+                ) : (
+                  <VerificationCode
+                    verificationCode={verificationCode}
+                    setVerificationCode={setVerificationCode}
+                    onSubmit={handleVerifyOTPEmail}
+                    onResend={handleResendOTPEmail}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {mode === "signphone" ? (
+                  <PhoneLoginForm
+                    onSubmit={handleLogin}
+                    value={phoneNumber}
+                    onChange={setPhoneNumber}
+                  />
+                ) : (
+                  <EmailLoginForm
+                    onSubmit={handleLoginEmail}
+                    initialEmail={email}
+                    loading={loading}
+                  />
+                )}
+              </>
+            )}
+                </div>
+                
+                {/* Legal disclaimer - Vision Pro style */}
+                <div className="mt-10 pt-8">
+                  <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-8"></div>
+                  <div className="opacity-60 hover:opacity-80 transition-opacity duration-300">
+                    <LegalDisclaimer />
                   </div>
                 </div>
               </div>
@@ -243,12 +241,10 @@ export function Login({
           </div>
         </div>
         
-        {/* Right column - Image placeholder */}
+        {/* Right column - Hero image */}
         <div className="hidden lg:flex items-center justify-center p-6 lg:p-12 relative overflow-hidden">
-          {/* Right column specific background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-gray-900/30 to-black/40"></div>
-          <div className="relative w-full h-full flex items-center justify-center z-10">
-            {/* Image placeholder */}
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Placeholder for hero image */}
             <div className="relative w-full h-96 rounded-[2rem] overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-pink-500/20 backdrop-blur-sm"></div>
               <div className="absolute inset-0 flex items-center justify-center">
@@ -260,7 +256,7 @@ export function Login({
                       <polyline points="21,15 16,10 5,21"/>
                     </svg>
                   </div>
-                  <p className="text-sm font-light">Image Placeholder</p>
+                  <p className="text-sm font-light">Hero Image</p>
                 </div>
               </div>
             </div>

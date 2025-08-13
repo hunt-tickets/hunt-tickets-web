@@ -24,17 +24,17 @@ const DropdownItem = React.forwardRef<HTMLElement, DropdownItemProps>(
       <SubframeCore.DropdownMenu.Item asChild={true} {...otherProps}>
         <div
           className={SubframeCore.twClassNames(
-            "group/adcae8d6 flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-3 hover:bg-neutral-100 active:bg-neutral-50 data-[highlighted]:bg-neutral-100",
+            "group/adcae8d6 flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-3 hover:bg-white/10 active:bg-white/20 data-[highlighted]:bg-white/10 transition-all duration-200",
             className
           )}
           ref={ref as any}
         >
           <SubframeCore.Icon
-            className="text-body font-body text-default-font"
+            className="text-white/80 h-4 w-4"
             name={icon}
           />
           {children ? (
-            <span className="line-clamp-1 grow shrink-0 basis-0 text-body font-body text-default-font group-hover/adcae8d6:text-default-font">
+            <span className="line-clamp-1 grow shrink-0 basis-0 text-white/80 text-sm group-hover/adcae8d6:text-white">
               {children}
             </span>
           ) : null}
@@ -62,7 +62,7 @@ const DropdownDivider = React.forwardRef<HTMLElement, DropdownDividerProps>(
         ref={ref as any}
         {...otherProps}
       >
-        <div className="flex h-px grow shrink-0 basis-0 flex-col items-center gap-2 bg-neutral-200" />
+        <div className="flex h-px grow shrink-0 basis-0 flex-col items-center gap-2 bg-white/20" />
       </div>
     );
   }
@@ -81,10 +81,13 @@ const DropdownMenuRoot = React.forwardRef<HTMLElement, DropdownMenuRootProps>(
     return children ? (
       <div
         className={SubframeCore.twClassNames(
-          "flex min-w-[192px] flex-col items-start rounded-md border border-solid border-neutral-border bg-default-background px-1 py-1 shadow-lg",
+          "flex min-w-[192px] flex-col items-start rounded-lg border border-solid border-white/20 bg-black/80 backdrop-blur-xl px-1 py-1 shadow-lg",
           className
         )}
         ref={ref as any}
+        style={{
+          backdropFilter: 'blur(20px)',
+        }}
         {...otherProps}
       >
         {children}

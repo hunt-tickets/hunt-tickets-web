@@ -121,7 +121,7 @@ export function Login({
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
       {/* Dynamic gradient background with Apple Vision Pro style */}
-      <div className="absolute inset-0 backdrop-blur-sm">
+      <div className="absolute inset-0">
         {/* Animated mesh gradient */}
         <div 
           className="absolute inset-0 opacity-40"
@@ -132,8 +132,7 @@ export function Login({
               radial-gradient(circle at 40% 80%, rgba(180, 180, 180, 0.18) 0%, transparent 50%),
               radial-gradient(circle at 0% 0%, rgba(220, 220, 220, 0.10) 0%, transparent 50%),
               radial-gradient(circle at 80% 100%, rgba(160, 160, 160, 0.14) 0%, transparent 50%)
-            `,
-            filter: 'blur(8px)'
+            `
           }}
         ></div>
         
@@ -153,6 +152,23 @@ export function Login({
       <div className="relative z-10 min-h-screen grid grid-cols-1 lg:grid-cols-2">
         {/* Left column - Complete login section */}
         <div className="flex items-center justify-center p-6 lg:p-12 relative">
+          {/* Left column specific background - Cool grayscale */}
+          <div className="absolute inset-0">
+            <div 
+              className="absolute inset-0 opacity-80"
+              style={{
+                background: `
+                  radial-gradient(ellipse 600px 800px at 30% 20%, rgba(255, 255, 255, 0.12) 0%, transparent 40%),
+                  radial-gradient(ellipse 400px 500px at 80% 70%, rgba(200, 200, 200, 0.15) 0%, transparent 45%),
+                  radial-gradient(ellipse 500px 600px at 10% 80%, rgba(150, 150, 150, 0.18) 0%, transparent 50%),
+                  radial-gradient(ellipse 300px 400px at 90% 10%, rgba(100, 100, 100, 0.20) 0%, transparent 35%),
+                  radial-gradient(ellipse 700px 300px at 50% 90%, rgba(180, 180, 180, 0.10) 0%, transparent 60%),
+                  linear-gradient(135deg, rgba(80, 80, 80, 0.08) 0%, rgba(160, 160, 160, 0.05) 50%, rgba(50, 50, 50, 0.12) 100%)
+                `
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-900/40 via-black/20 to-gray-800/50 backdrop-blur-lg"></div>
+          </div>
           <div className="w-full max-w-lg relative z-10">            
             {/* Vision Pro style card */}
             <div className="relative group w-full">

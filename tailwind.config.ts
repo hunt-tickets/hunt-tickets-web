@@ -242,6 +242,12 @@ const config: Config = {
         lg: "8px",
         full: "9999px",
       },
+      rotate: {
+        '15': '15deg',
+      },
+      backgroundImage: {
+        'noise': "url('https://www.reactbits.dev/assets/noise.png')",
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports

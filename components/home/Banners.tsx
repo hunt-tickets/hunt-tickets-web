@@ -58,25 +58,54 @@ const Banner = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       
-      {/* Video Background */}
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source src="https://jtfcfsnksywotlbsddqb.supabase.co/storage/v1/object/public/website/video_hero.mp4" type="video/mp4" />
-      </video>
-
-      {/* Grain texture overlay */}
-      <div 
-        className="absolute inset-0 opacity-60 mix-blend-multiply pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='6' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          backgroundSize: '200px 200px'
-        }}
-      ></div>
+      {/* Background with gradient bars like Hero Section */}
+      <div className="absolute inset-0 bg-gray-950"></div>
+      
+      {/* Gradient bars component - gray version */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div 
+          className="flex h-full"
+          style={{
+            width: '100%',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            WebkitFontSmoothing: 'antialiased',
+          }}
+        >
+          {Array.from({ length: 15 }).map((_, index) => {
+            const calculateHeight = (index: number, total: number) => {
+              const position = index / (total - 1);
+              const maxHeight = 100;
+              const minHeight = 30;
+              
+              const center = 0.5;
+              const distanceFromCenter = Math.abs(position - center);
+              const heightPercentage = Math.pow(distanceFromCenter * 2, 1.2);
+              
+              return minHeight + (maxHeight - minHeight) * heightPercentage;
+            };
+            const height = calculateHeight(index, 15);
+            return (
+              <div
+                key={index}
+                style={{
+                  flex: '1 0 calc(100% / 15)',
+                  maxWidth: 'calc(100% / 15)',
+                  height: '100%',
+                  background: 'linear-gradient(to top, rgb(107, 114, 128), transparent)',
+                  transform: `scaleY(${height / 100})`,
+                  transformOrigin: 'bottom',
+                  transition: 'transform 0.5s ease-in-out',
+                  animation: 'pulseBar 2s ease-in-out infinite alternate',
+                  animationDelay: `${index * 0.1}s`,
+                  outline: '1px solid rgba(0, 0, 0, 0)',
+                  boxSizing: 'border-box',
+                }}
+              />
+            );
+          })}
+        </div>
+      </div>
 
       {/* Gradient overlay for smooth transition to next section */}
       <div 
@@ -398,6 +427,11 @@ const Banner = () => {
         
         .animate-scroll-wheel { animation: scroll-wheel 2s ease-in-out infinite; }
         .animate-bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
+        
+        @keyframes pulseBar {
+          0% { transform: scaleY(0.8); }
+          100% { transform: scaleY(1.2); }
+        }
       `}</style>
 
     </div>

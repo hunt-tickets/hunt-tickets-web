@@ -27,9 +27,9 @@ const NavItem = React.forwardRef<HTMLElement, NavItemProps>(function NavItem(
         <SubframeCore.Tooltip.Trigger asChild={true}>
           <div
             className={SubframeCore.twClassNames(
-              "group/ba3a61e5 flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 hover:bg-neutral-50 active:bg-neutral-100",
+              "group/ba3a61e5 flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-white/10 active:bg-white/20 transition-all duration-200",
               {
-                "bg-brand-50 hover:bg-brand-50 active:border active:border-solid active:border-neutral-border active:bg-default-background":
+                "bg-white/20 hover:bg-white/30 border border-white/20":
                   selected,
               },
               className
@@ -39,8 +39,8 @@ const NavItem = React.forwardRef<HTMLElement, NavItemProps>(function NavItem(
           >
             <SubframeCore.Icon
               className={SubframeCore.twClassNames(
-                "text-heading-3 font-heading-3 text-neutral-600",
-                { "text-brand-700": selected }
+                "text-white/80 h-5 w-5 transition-colors duration-200",
+                { "text-white": selected }
               )}
               name={icon}
             />
@@ -55,9 +55,9 @@ const NavItem = React.forwardRef<HTMLElement, NavItemProps>(function NavItem(
           >
             <Tooltip
               className={SubframeCore.twClassNames(
-                "bg-black text-white border border-gray-500",
+                "bg-black/80 backdrop-blur-xl text-white border border-white/20",
                 {
-                  "group-active/ba3a61e5:bg-black group-active/ba3a61e5:text-white group-active/ba3a61e5:border group-active/ba3a61e5:border-gray-500":
+                  "group-active/ba3a61e5:bg-black/80 group-active/ba3a61e5:text-white group-active/ba3a61e5:border group-active/ba3a61e5:border-white/20":
                     selected,
                 }
               )}
@@ -95,10 +95,13 @@ const SidebarRailWithIconsRoot = React.forwardRef<
   return (
     <nav
       className={SubframeCore.twClassNames(
-        "group/0d7efe0e flex h-full flex-col items-start border-r border-neutral-border border-none bg-[#0f0f0fff]",
+        "group/0d7efe0e flex h-full flex-col items-start border-r border-white/10 bg-black/20 backdrop-blur-xl",
         className
       )}
       ref={ref as any}
+      style={{
+        backdropFilter: 'blur(20px)',
+      }}
       {...otherProps}
     >
       {header ? (
@@ -112,7 +115,7 @@ const SidebarRailWithIconsRoot = React.forwardRef<
         </div>
       ) : null}
       {footer ? (
-        <div className="flex w-full flex-col items-center justify-end gap-1 border-t border-solid border-neutral-border px-3 py-3">
+        <div className="flex w-full flex-col items-center justify-end gap-1 border-t border-solid border-white/10 px-3 py-3">
           {footer}
         </div>
       ) : null}

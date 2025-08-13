@@ -12,6 +12,12 @@ import ImgLogo from "./ImgLogo";
 function SidebarRailWithIconsExample() {
   return (
     <SidebarRailWithIcons
+      style={{
+        background: 'rgba(0, 0, 0, 0.2)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+      }}
       header={
         <div className="flex flex-col items-center justify-center gap-2 px-1 py-1">
           <ImgLogo />
@@ -39,7 +45,14 @@ function SidebarRailWithIconsExample() {
                   sideOffset={4}
                   asChild={true}
                 >
-                  <DropdownMenu>
+                  <DropdownMenu 
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.8)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                    }}
+                  >
                     <DropdownMenu.DropdownItem icon="FeatherUser">
                       Profile
                     </DropdownMenu.DropdownItem>
@@ -59,7 +72,9 @@ function SidebarRailWithIconsExample() {
     >
       {menuAdminData.map((item, index) => (
         <Link key={item.label + index} href={item.href}>
-          <SidebarRailWithIcons.NavItem icon={item.icon as IconName}>
+          <SidebarRailWithIcons.NavItem 
+            icon={item.icon as IconName}
+          >
             {item.label}
           </SidebarRailWithIcons.NavItem>
         </Link>
