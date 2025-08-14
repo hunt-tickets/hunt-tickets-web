@@ -154,43 +154,15 @@ export function Login({
         {/* Left column - Complete login section */}
         <div className="flex items-center justify-center p-6 lg:p-12 relative">
           <div className="w-full max-w-lg relative z-10">            
-            {/* Vision Pro style card */}
-            <div className="relative group w-full">
-              {/* Depth layers for Apple Vision Pro effect */}
-              <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] scale-[1.02] opacity-40 group-hover:scale-[1.03] transition-all duration-700"></div>
-              <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-2xl rounded-[2rem] scale-[1.01] opacity-60 group-hover:scale-[1.02] transition-all duration-500"></div>
-              
-              <div 
-                className="relative bg-white/[0.05] backdrop-blur-xl rounded-[2rem] p-8 border border-white/[0.08] group-hover:border-white/[0.12] transition-all duration-500"
-                style={{
-                  boxShadow: `
-                    0 0 0 1px rgba(255, 255, 255, 0.05),
-                    0 16px 32px rgba(0, 0, 0, 0.4),
-                    0 8px 16px rgba(0, 0, 0, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    inset 0 -1px 0 rgba(0, 0, 0, 0.1)
-                  `
-                }}
-              >
+            {/* Glassmorphism card with hover effects */}
+            <div className="relative w-full">
+              <div className="relative p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-white/20 transition-all duration-300 shadow-lg">
                 {/* Subtle internal glow */}
-                <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-60 pointer-events-none"></div>
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-60 pointer-events-none"></div>
                 
                 <div className="relative z-10">
                   {/* Header inside the box */}
-                  <HeaderLogin
-                    title="Inicio/Registro"
-                  />
-                  
-                  {message && (
-                    <div className="mb-6">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-2xl rounded-3xl"></div>
-                        <div className="relative p-6 rounded-3xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border border-blue-500/20">
-                          <p className="text-center text-base font-light text-blue-100 leading-relaxed">{message}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <HeaderLogin />
                   
                   <div className="space-y-5">
                     {otpSent ? (
@@ -201,6 +173,8 @@ export function Login({
                             setVerificationCode={setVerificationCode}
                             onSubmit={handleVerifyOTP}
                             onResend={handleResendOTP}
+                            contactInfo={phoneNumber}
+                            isEmail={false}
                           />
                         ) : (
                           <VerificationCode
@@ -208,6 +182,8 @@ export function Login({
                             setVerificationCode={setVerificationCode}
                             onSubmit={handleVerifyOTPEmail}
                             onResend={handleResendOTPEmail}
+                            contactInfo={email}
+                            isEmail={true}
                           />
                         )}
                       </>
@@ -243,25 +219,38 @@ export function Login({
           </div>
         </div>
         
-        {/* Right column - Image placeholder */}
-        <div className="hidden lg:flex items-center justify-center p-6 lg:p-12 relative overflow-hidden">
-          {/* Right column specific background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-gray-900/30 to-black/40"></div>
-          <div className="relative w-full h-full flex items-center justify-center z-10">
-            {/* Image placeholder */}
-            <div className="relative w-full h-96 rounded-[2rem] overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-pink-500/20 backdrop-blur-sm"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white/40">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="8.5" cy="8.5" r="1.5"/>
-                      <polyline points="21,15 16,10 5,21"/>
-                    </svg>
-                  </div>
-                  <p className="text-sm font-light">Image Placeholder</p>
-                </div>
+        {/* Right column - Hero image + testimonials */}
+        <div className="hidden lg:block relative p-4">
+          <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center" 
+               style={{ backgroundImage: `url(https://images.unsplash.com/photo-1642615835477-d303d7dc9ee9?w=2160&q=80)` }}>
+          </div>
+          
+          {/* Testimonials */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
+            <div className="animate-testimonial animate-delay-1000 flex items-start gap-3 rounded-3xl bg-card/40 backdrop-blur-xl border border-white/10 p-5 w-64">
+              <img src="https://randomuser.me/api/portraits/women/57.jpg" className="h-10 w-10 object-cover rounded-2xl" alt="avatar" />
+              <div className="text-sm leading-snug">
+                <p className="flex items-center gap-1 font-medium text-white">Sarah Chen</p>
+                <p className="text-gray-400">@sarahdigital</p>
+                <p className="mt-1 text-white/80">Amazing platform! The user experience is seamless and the features are exactly what I needed.</p>
+              </div>
+            </div>
+            
+            <div className="hidden xl:flex animate-testimonial animate-delay-1200 items-start gap-3 rounded-3xl bg-card/40 backdrop-blur-xl border border-white/10 p-5 w-64">
+              <img src="https://randomuser.me/api/portraits/men/64.jpg" className="h-10 w-10 object-cover rounded-2xl" alt="avatar" />
+              <div className="text-sm leading-snug">
+                <p className="flex items-center gap-1 font-medium text-white">Marcus Johnson</p>
+                <p className="text-gray-400">@marcustech</p>
+                <p className="mt-1 text-white/80">This service has transformed how I work. Clean design, powerful features, and excellent support.</p>
+              </div>
+            </div>
+            
+            <div className="hidden 2xl:flex animate-testimonial animate-delay-1400 items-start gap-3 rounded-3xl bg-card/40 backdrop-blur-xl border border-white/10 p-5 w-64">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" className="h-10 w-10 object-cover rounded-2xl" alt="avatar" />
+              <div className="text-sm leading-snug">
+                <p className="flex items-center gap-1 font-medium text-white">David Martinez</p>
+                <p className="text-gray-400">@davidcreates</p>
+                <p className="mt-1 text-white/80">I've tried many platforms, but this one stands out. Intuitive, reliable, and genuinely helpful for productivity.</p>
               </div>
             </div>
           </div>

@@ -6,9 +6,6 @@ const Discover = () => {
     <div className="flex w-full max-w-[1280px] grow shrink-0 basis-0 flex-wrap items-center justify-center gap-12">
       <div className="flex min-w-[320px] grow shrink-0 basis-0 flex-col items-start justify-center gap-10 self-stretch">
         <div className="flex max-w-[448px] flex-col items-start justify-center gap-4">
-          <h2 className="text-heading-1 font-heading-1 text-default-font">
-            Descubre los mejores eventos en tu ciudad
-          </h2>
           <p className="text-body font-body text-subtext-color">
             Te recomendamos planes a tu medida, basados en tus gustos y tu forma de vivir la ciudad. Encontrar qué hacer nunca fue tan fácil.
           </p>

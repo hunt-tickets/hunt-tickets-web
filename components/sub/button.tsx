@@ -57,7 +57,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonRootProps>(
               variant === "destructive-primary",
             "bg-transparent hover:bg-neutral-100 active:bg-neutral-200":
               variant === "neutral-tertiary",
-            "border border-solid border-white/20 bg-white/5 hover:bg-white/15 hover:border-white/30 hover:shadow-lg active:bg-white/8":
+            "border border-solid border-white/20 bg-white/5 backdrop-blur-xl hover:bg-white/15 hover:border-white/30 hover:shadow-lg active:bg-white/8":
               variant === "neutral-secondary",
             "bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-100":
               variant === "neutral-primary",

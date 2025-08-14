@@ -211,7 +211,7 @@ const Banner = () => {
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <div className="text-center space-y-8 px-6">
           
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-none tracking-tight drop-shadow-2xl">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-none drop-shadow-2xl" style={{ letterSpacing: '-5px', lineHeight: '130%' }}>
             HUNT FOR GOOD<br />
             <span className="relative inline-block">
               {displayedText}

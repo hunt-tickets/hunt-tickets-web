@@ -1,4 +1,4 @@
-const HeaderLogin = ({ title }: { title: string }) => {
+const HeaderLogin = ({ title }: { title?: string }) => {
   return (
     <div className="text-center space-y-4 mb-10">
       {/* Logo */}
@@ -12,10 +12,12 @@ const HeaderLogin = ({ title }: { title: string }) => {
         </div>
       </div>
       
-      {/* Title */}
-      <h1 className="text-2xl font-medium text-white tracking-[-0.01em]">
-        {title}
-      </h1>
+      {/* Title - solo mostrar si se proporciona */}
+      {title && (
+        <h1 className="text-2xl font-medium text-white tracking-[-0.01em]">
+          {title}
+        </h1>
+      )}
     </div>
   );
 };

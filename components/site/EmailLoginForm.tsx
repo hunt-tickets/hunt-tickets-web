@@ -52,7 +52,8 @@ const EmailLoginForm = ({
             {/* Button in normal position when keyboard is hidden */}
             {!isKeyboardVisible && (
               <Button
-                className="h-12 w-full flex-none"
+                className="h-12 w-full flex-none text-white"
+                variant="neutral-secondary"
                 size="large"
                 icon={null}
                 iconRight="FeatherArrowRight"
@@ -68,7 +69,8 @@ const EmailLoginForm = ({
           {isKeyboardVisible && (
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-md border-t border-white/10 z-50 transition-all duration-300">
               <Button
-                className="h-12 w-full flex-none"
+                className="h-12 w-full flex-none text-white"
+                variant="neutral-secondary"
                 size="large"
                 icon={null}
                 iconRight="FeatherArrowRight"

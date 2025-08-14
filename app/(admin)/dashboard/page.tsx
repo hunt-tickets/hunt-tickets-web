@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseBrowser";
 import { useRouter } from "next/navigation";
 import { Calendar, Users, BarChart3, Star } from "lucide-react";
 import CombinedStatistics from "@/components/ui/combined-statistics";
+import { DashboardChart } from "@/components/ui/chart-demo";
 
 export default function Dashboard() {
   const { user, loading: userLoading } = useUser();
@@ -50,6 +51,11 @@ const DashboardContent = () => {
 
         {/* Stats Cards */}
         <CombinedStatistics />
+
+        {/* Analytics Chart */}
+        <div className="mb-6">
+          <DashboardChart />
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">

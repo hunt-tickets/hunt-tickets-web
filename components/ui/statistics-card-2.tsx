@@ -40,11 +40,11 @@ function formatNumber(n: number) {
 
 export default function StatisticsCard2() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
       {stats.map((stat, index) => (
         <Card 
           key={index} 
-          className="relative overflow-hidden bg-black/20 backdrop-blur-xl border border-white/10 text-white"
+          className="relative overflow-hidden bg-black/20 backdrop-blur-xl border border-white/10 text-white h-full flex flex-col"
           style={{
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
