@@ -5,8 +5,15 @@ import {
 } from "@/supabase/producersService";
 import { useEffect, useState } from "react";
 
+interface Seller {
+  id: string;
+  name?: string;
+  phone?: string;
+  [key: string]: any;
+}
+
 export const useSellers = (producerId: string) => {
-  const [sellers, setSellers] = useState([]);
+  const [sellers, setSellers] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
