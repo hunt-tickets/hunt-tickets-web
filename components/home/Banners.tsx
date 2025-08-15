@@ -235,12 +235,14 @@ const Banner = () => {
                   borderRadius: '9999px'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.4)';
-                  e.target.style.color = 'white';
+                  const target = e.target as HTMLElement;
+                  target.style.background = 'rgba(255, 255, 255, 0.4)';
+                  target.style.color = 'white';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                  e.target.style.color = 'white';
+                  const target = e.target as HTMLElement;
+                  target.style.background = 'rgba(255, 255, 255, 0.1)';
+                  target.style.color = 'white';
                 }}
               >
                 Descubrir Eventos
