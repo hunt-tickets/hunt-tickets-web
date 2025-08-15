@@ -9,6 +9,7 @@ export const menuAdminData = [
   { icon: "FeatherMusic", label: "Artists", href: "/artists" },
   { icon: "FeatherArmchair", label: "Venues", href: "/venues" },
   { icon: "FeatherBarChart3", label: "Finanzas", href: "/finances" },
+  { icon: "FeatherCreditCard", label: "Suscripciones", href: "/subscriptions" },
   { icon: "FeatherDatabase", label: "Tech", href: "/tech" },
   { icon: "FeatherHelpCircle", label: "Support", href: "/support" },
 ];

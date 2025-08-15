@@ -15,6 +15,8 @@ interface CardEventProps {
   date?: string;
   price?: number;
   glassmorphismColor?: string;
+  hideVenuePriceInfo?: boolean;
+  isDashboard?: boolean;
 }
 
 const CardEvent = ({
@@ -26,6 +28,8 @@ const CardEvent = ({
   date,
   price,
   glassmorphismColor = 'bg-white/5',
+  hideVenuePriceInfo = false,
+  isDashboard = false,
 }: CardEventProps) => {
   const [loaded, setLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -50,7 +54,7 @@ const CardEvent = ({
       <div className={`relative p-6 rounded-3xl backdrop-blur-xl ${glassmorphismColor} border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-white/20 group`}>
         
         {/* GlowingEffect for glassmorphism border */}
-        <div className="absolute inset-0 z-50 rounded-3xl">
+        <div className="absolute inset-0 z-0 rounded-3xl pointer-events-none">
           <GlowingEffect
             spread={40}
             glow={true}
@@ -63,7 +67,7 @@ const CardEvent = ({
           />
         </div>
         
-        <Link href={`/events/${id}`} className="relative z-10">
+        <Link href={isDashboard ? `/dashboard/events/${id}` : `/events/${id}`} className="relative z-10">
         <div 
           className="relative mx-auto w-full rounded-3xl transition-all duration-500 ease-out group cursor-pointer" 
           style={{ 
@@ -111,7 +115,7 @@ const CardEvent = ({
         </ImageLoadingReveal>
         
         {/* Glowing Effect for Image - Inner Layer */}
-        <div className="absolute inset-0 z-40 rounded-3xl transition-all duration-300 group-hover:scale-[1.01] group-hover:brightness-110">
+        <div className="absolute inset-0 z-0 rounded-3xl transition-all duration-300 group-hover:scale-[1.01] group-hover:brightness-110 pointer-events-none">
           <GlowingEffect
             spread={40}
             glow={true}
@@ -126,21 +130,35 @@ const CardEvent = ({
         
         
         
-        {date && (
-          <div className="absolute top-4 right-4 z-30 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2" style={{ border: '1px solid #404040' }}>
-            <div className="flex flex-col items-center text-white">
-              <span className="text-xl font-bold leading-none" style={{ textShadow: '0 0 1px rgba(156, 163, 175, 0.5)' }}>
-                {new Date(date).getDate()}
-              </span>
-              <span className="text-xs font-medium uppercase leading-none mt-1" style={{ textShadow: '0 0 1px rgba(156, 163, 175, 0.5)' }}>
-                {new Date(date).toLocaleDateString('es-ES', { month: 'short' }).toUpperCase()}
-              </span>
+        {date && (() => {
+          // Parse date correctly for DD/MM/YYYY format
+          let parsedDate;
+          if (date.includes('/')) {
+            const [day, month, year] = date.split('/');
+            parsedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          } else {
+            parsedDate = new Date(date);
+          }
+          
+          // Only show if date is valid
+          if (isNaN(parsedDate.getTime())) return null;
+          
+          return (
+            <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2" style={{ border: '1px solid #404040' }}>
+              <div className="flex flex-col items-center text-white">
+                <span className="text-xl font-bold leading-none" style={{ textShadow: '0 0 1px rgba(156, 163, 175, 0.5)' }}>
+                  {parsedDate.getDate()}
+                </span>
+                <span className="text-xs font-medium uppercase leading-none mt-1" style={{ textShadow: '0 0 1px rgba(156, 163, 175, 0.5)' }}>
+                  {parsedDate.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase()}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
-        {price && (
-          <div className="absolute bottom-4 left-4 z-30 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2" style={{ border: '1px solid #404040' }}>
+        {price && price > 0 && !hideVenuePriceInfo && (
+          <div className="absolute bottom-4 left-4 z-20 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2" style={{ border: '1px solid #404040' }}>
             <div className="text-white flex items-center space-x-2">
               <span className="text-xs font-medium opacity-80">Desde</span>
               <span className="text-lg font-bold" style={{ textShadow: '0 0 1px rgba(156, 163, 175, 0.5)' }}>
@@ -157,9 +175,11 @@ const CardEvent = ({
           <h2 className="text-heading-2 font-heading-2 text-white line-clamp-2 group-hover:text-gray-100 transition-colors duration-300 h-[3.5rem] flex items-start">
             {name}
           </h2>
-          <p className="text-body font-body text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
-            {location || 'Centro de Eventos Movistar Arena'}
-          </p>
+          {!hideVenuePriceInfo && (
+            <p className="text-body font-body text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+              {location || 'Centro de Eventos Movistar Arena'}
+            </p>
+          )}
         </div>
 
         </Link>

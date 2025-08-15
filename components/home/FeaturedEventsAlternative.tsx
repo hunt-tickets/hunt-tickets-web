@@ -68,7 +68,7 @@ const FeaturedEventsAlternative = ({ events }: FeaturedEventsAlternativeProps) =
   if (!events.length) return null;
 
   return (
-    <section className="w-full bg-default-background py-20">
+    <section className="w-full bg-default-background py-32">
       <div className="w-full px-6">
         
         {/* Header - Single line layout with centered tabs */}
@@ -137,8 +137,11 @@ const FeaturedEventsAlternative = ({ events }: FeaturedEventsAlternativeProps) =
                   key={event.uniqueKey || event.id} 
                   className="flex-shrink-0 w-[calc(20%-1.2rem)] min-w-[280px] group transform hover:scale-105 transition-all duration-500 ease-in-out"
                   style={{ 
-                    animationDelay: `${index * 100}ms`,
-                    animation: 'fadeInUp 0.6s ease-out forwards'
+                    animationName: 'fadeInUp',
+                    animationDuration: '0.6s',
+                    animationTimingFunction: 'ease-out',
+                    animationFillMode: 'forwards',
+                    animationDelay: `${index * 100}ms`
                   }}
                 >
                   <CardEvent

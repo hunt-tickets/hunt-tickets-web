@@ -30,11 +30,16 @@ const config: Config = {
             "offset-distance": "100%",
           },
         },
+        rainbow: {
+          "0%": { "background-position": "0%" },
+          "100%": { "background-position": "200%" },
+        },
       },
       animation: {
         "caret-blink": "caret-blink 1.25s ease-out infinite",
         'float-up': 'floatUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
         "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+        rainbow: "rainbow var(--speed, 2s) infinite linear",
       },
       fontSize: {
         caption: [
@@ -125,6 +130,11 @@ const config: Config = {
         'float': '0 20px 40px rgba(0,0,0,0.5)',
       },
       colors: {
+        "color-1": "hsl(var(--color-1))",
+        "color-2": "hsl(var(--color-2))",
+        "color-3": "hsl(var(--color-3))",
+        "color-4": "hsl(var(--color-4))",
+        "color-5": "hsl(var(--color-5))",
         brand: {
           50: "rgb(23, 23, 23)",
           100: "rgb(38, 38, 38)",

@@ -46,6 +46,22 @@ const BoldNavbar = ({
     }
   };
 
+  // Función para obtener iniciales del usuario
+  const getUserInitials = (user: any, profile: any) => {
+    if (profile?.name) {
+      const names = profile.name.split(' ');
+      return names.map((name: string) => name.charAt(0).toUpperCase()).join('').slice(0, 2);
+    }
+    if (user?.user_metadata?.full_name) {
+      const names = user.user_metadata.full_name.split(' ');
+      return names.map((name: string) => name.charAt(0).toUpperCase()).join('').slice(0, 2);
+    }
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
     <div
       className={SubframeCore.twClassNames(
@@ -85,60 +101,46 @@ const BoldNavbar = ({
         <LinkButton>Help</LinkButton>
       </div>
       <div className="hidden md:flex items-center gap-2 px-2">
-        {user?.id ? (
-          <>
-            <div className="flex items-center gap-2 px-2">
-              <Button
-                variant="brand-tertiary"
-                icon="FeatherUser"
-                onClick={handleProfile}
-              >
-                <span>
-                  <Badge>
-                    <b>{profile?.name || user?.email}</b>
-                  </Badge>
-                </span>
-              </Button>
-              <Button
-                variant="brand-tertiary"
-                icon="FeatherLogOut"
-                onClick={handleLogout}
-              >
-                Log out
-              </Button>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center gap-3">
-            {/* Botón buscador circular */}
-            <button className="w-10 h-10 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm hover:bg-white/10 transition-all duration-200 flex items-center justify-center group">
+        <div className="flex items-center gap-3">
+          {/* Botón buscador circular */}
+          <button className="w-10 h-10 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm hover:bg-white/10 transition-all duration-200 flex items-center justify-center group">
+            <svg className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+          
+          {/* Botón menú lateral circular */}
+          <button 
+            onClick={() => setIsMenuOpen && setIsMenuOpen(!isMenuOpen)}
+            className={`w-10 h-10 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm hover:bg-white/10 transition-all duration-200 flex items-center justify-center group ${
+              isMenuOpen ? 'rotate-90' : ''
+            }`}
+          >
+            {isMenuOpen ? (
               <svg className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
-            
-            {/* Botón menú lateral circular */}
-            <button 
-              onClick={() => setIsMenuOpen && setIsMenuOpen(!isMenuOpen)}
-              className={`w-10 h-10 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm hover:bg-white/10 transition-all duration-200 flex items-center justify-center group ${
-                isMenuOpen ? 'rotate-90' : ''
-              }`}
+            ) : (
+              <svg className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <line x1="3" x2="21" y1="6" y2="6"></line>
+                <line x1="3" x2="21" y1="12" y2="12"></line>
+                <line x1="3" x2="21" y1="18" y2="18"></line>
+              </svg>
+            )}
+          </button>
+          
+          {/* Usuario logueado - círculo con iniciales o botón iniciar sesión */}
+          {user?.id ? (
+            <button
+              onClick={handleProfile}
+              className="w-10 h-10 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200"
             >
-              {isMenuOpen ? (
-                <svg className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <line x1="3" x2="21" y1="6" y2="6"></line>
-                  <line x1="3" x2="21" y1="12" y2="12"></line>
-                  <line x1="3" x2="21" y1="18" y2="18"></line>
-                </svg>
-              )}
+              <span className="text-white font-semibold text-sm">
+                {getUserInitials(user, profile)}
+              </span>
             </button>
-            
-            {/* Botón iniciar sesión */}
+          ) : (
             <Link href="/sign-mail">
               <div className="relative group">
                 <div className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm hover:bg-white/10 transition-all duration-200">
@@ -148,8 +150,8 @@ const BoldNavbar = ({
                 </div>
               </div>
             </Link>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

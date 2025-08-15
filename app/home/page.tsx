@@ -19,7 +19,6 @@ import { usePopularEvents } from "@/hook/usePopularEvents";
 import { useUser } from "@/lib/UserContext";
 import { useState } from "react";
 import React from "react";
-import Link from "next/link";
 
 const DynamicTitle = () => {
   const { hoveredCard } = useCardHover();
@@ -76,6 +75,7 @@ const EventsPage = () => {
           </div>
         </div>
       </section>
+
       
       <MobileEventFooter />
       </div>
