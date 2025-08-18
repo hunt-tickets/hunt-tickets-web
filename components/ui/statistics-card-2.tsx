@@ -30,6 +30,15 @@ const stats = [
     prefix: '',
     suffix: '',
   },
+  {
+    title: 'Ventas Totales',
+    value: 45600,
+    delta: 23.7,
+    lastMonth: 36900,
+    positive: true,
+    prefix: '$',
+    suffix: '',
+  },
 ];
 
 function formatNumber(n: number) {
@@ -40,7 +49,7 @@ function formatNumber(n: number) {
 
 export default function StatisticsCard2() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-full">
       {stats.map((stat, index) => (
         <Card 
           key={index} 

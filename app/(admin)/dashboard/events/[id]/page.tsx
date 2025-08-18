@@ -20,6 +20,9 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 import { getEventTransactions, type Transaction, type TransactionsResponse } from "@/lib/api/transactions";
+import { getEventGuestList, getGuestListKPIs, type GuestListItem, type GuestListResponse, type GuestListKPIs } from "@/lib/api/guest-list";
+import GuestListKPIs from "@/components/ui/guest-list-kpis";
+import GuestListTable from "@/components/ui/guest-list-table";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { Bar, BarChart, XAxis, Cell as RechartsCell } from "recharts";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/bar-chart";
@@ -119,6 +122,380 @@ export default function EventDetailsPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [ticketsSubTab, setTicketsSubTab] = useState("tickets");
   const [settingsSubTab, setSettingsSubTab] = useState("basic");
+  const [cortesiasSubTab, setCortesiasSubTab] = useState("dashboard");
+  
+  // Guest List states
+  const [guestListData, setGuestListData] = useState<GuestListResponse | null>(null);
+  const [guestListKPIs, setGuestListKPIs] = useState<GuestListKPIs | null>(null);
+  const [loadingGuestList, setLoadingGuestList] = useState(false);
+  const [guestListPage, setGuestListPage] = useState(1);
+  const [guestListSearch, setGuestListSearch] = useState("");
+  const [guestListStatusFilter, setGuestListStatusFilter] = useState("all");
+  
+  // Modal states
+  const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
+  
+  // Map editor states
+  const [selectedTool, setSelectedTool] = useState('select');
+  const [mapElements, setMapElements] = useState([
+    { id: 'stage', type: 'stage', x: 300, y: 50, width: 400, height: 60, name: 'ESCENARIO' },
+    { id: 'general', type: 'zone', x: 100, y: 200, width: 300, height: 150, name: 'General', color: '#3b82f6', seats: 96 },
+    { id: 'vip', type: 'zone', x: 500, y: 150, width: 200, height: 100, name: 'VIP', color: '#fbbf24', seats: 80 },
+    { id: 'platinum', type: 'zone', x: 500, y: 300, width: 150, height: 80, name: 'Platinum', color: '#8b5cf6', seats: 40 }
+  ]);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [elementStartPos, setElementStartPos] = useState({ x: 0, y: 0 });
+
+  // Categories and pricing system
+  const [categories] = useState([
+    { id: 'general', name: 'General', color: '#3b82f6', price: 0 },
+    { id: 'silver', name: 'Silver', color: '#9ca3af', price: 0 },
+    { id: 'gold', name: 'Gold', color: '#fbbf24', price: 0 },
+    { id: 'platinum', name: 'Platinum', color: '#8b5cf6', price: 0 },
+    { id: 'vip', name: 'VIP', color: '#ef4444', price: 0 },
+    { id: 'accessibility', name: 'Accesibilidad', color: '#06b6d4', price: 0 }
+  ]);
+
+  // Seat states
+  const seatStates = {
+    available: { name: 'Disponible', color: '#10b981' },
+    reserved: { name: 'Reservado', color: '#f59e0b' },
+    sold: { name: 'Vendido', color: '#ef4444' },
+    blocked: { name: 'Bloqueado', color: '#6b7280' },
+    wheelchair: { name: 'Silla de Ruedas', color: '#06b6d4' }
+  };
+
+  // Funciones del editor de mapas
+  const handleCanvasClick = (event) => {
+    const svg = event.currentTarget;
+    const rect = svg.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 1000;
+    const y = ((event.clientY - rect.top) / rect.height) * 600;
+
+    if (selectedTool === 'select') {
+      // Deselect current element when clicking on empty space
+      setSelectedElement(null);
+      return;
+    }
+
+    let newElement = null;
+
+    switch (selectedTool) {
+      case 'rectangle':
+        newElement = {
+          id: `zone-${Date.now()}`,
+          type: 'zone',
+          x: Math.round(x - 50),
+          y: Math.round(y - 25),
+          width: 100,
+          height: 50,
+          name: 'Nueva Zona',
+          color: '#3b82f6',
+          seats: 0
+        };
+        break;
+
+      case 'circle':
+        newElement = {
+          id: `zone-circle-${Date.now()}`,
+          type: 'zone',
+          x: Math.round(x - 50),
+          y: Math.round(y - 50),
+          width: 100,
+          height: 100,
+          name: 'Zona Circular',
+          color: '#8b5cf6',
+          seats: 0,
+          shape: 'circle'
+        };
+        break;
+
+      case 'stage':
+        newElement = {
+          id: `stage-${Date.now()}`,
+          type: 'stage',
+          x: Math.round(x - 100),
+          y: Math.round(y - 30),
+          width: 200,
+          height: 60,
+          name: 'Escenario'
+        };
+        break;
+
+      case 'seat':
+        newElement = {
+          id: `seat-${Date.now()}`,
+          type: 'seat',
+          x: Math.round(x),
+          y: Math.round(y),
+          width: 14,
+          height: 12,
+          name: 'Asiento'
+        };
+        break;
+
+      case 'row':
+        const existingRows = mapElements.filter(el => el.type === 'row');
+        const rowIndex = existingRows.length;
+        const rowLabel = generateRowLabel(rowIndex);
+        
+        newElement = {
+          id: `row-${Date.now()}`,
+          type: 'row',
+          x: Math.round(x - 80),
+          y: Math.round(y - 6),
+          width: 160,
+          height: 12,
+          name: `Fila ${rowLabel}`,
+          seats: 10,
+          rowCount: 1,
+          seatsPerRow: 10,
+          seatSpacing: 16,
+          rowSpacing: 18,
+          rowLetter: rowLabel,
+          numberingDirection: 'left-to-right',
+          isEvenOdd: false
+        };
+        break;
+
+      case 'block':
+        newElement = {
+          id: `block-${Date.now()}`,
+          type: 'block',
+          x: Math.round(x - 55),
+          y: Math.round(y - 25),
+          width: 110,
+          height: 50,
+          name: 'Bloque VIP',
+          seats: 40
+        };
+        break;
+
+      case 'entrance':
+        newElement = {
+          id: `entrance-${Date.now()}`,
+          type: 'entrance',
+          x: Math.round(x),
+          y: Math.round(y),
+          width: 30,
+          height: 30,
+          name: 'Entrada'
+        };
+        break;
+
+      case 'bathroom':
+        newElement = {
+          id: `bathroom-${Date.now()}`,
+          type: 'bathroom',
+          x: Math.round(x),
+          y: Math.round(y),
+          width: 40,
+          height: 30,
+          name: 'Baño'
+        };
+        break;
+
+      case 'table':
+        newElement = {
+          id: `table-${Date.now()}`,
+          type: 'table',
+          x: Math.round(x),
+          y: Math.round(y),
+          radius: 40,
+          name: 'Mesa 1',
+          seats: 8,
+          tableNumber: 1,
+          seatsAroundTable: [
+            { angle: 0, occupied: false },
+            { angle: 45, occupied: false },
+            { angle: 90, occupied: false },
+            { angle: 135, occupied: false },
+            { angle: 180, occupied: false },
+            { angle: 225, occupied: false },
+            { angle: 270, occupied: false },
+            { angle: 315, occupied: false }
+          ]
+        };
+        break;
+
+      case 'section':
+        newElement = {
+          id: `section-${Date.now()}`,
+          type: 'section',
+          x: Math.round(x - 100),
+          y: Math.round(y - 50),
+          width: 200,
+          height: 100,
+          name: 'Sección A',
+          category: 'general',
+          totalSeats: 0,
+          isGeneralAdmission: true,
+          capacity: 100,
+          elements: [] // Will contain child elements (rows, seats, etc.)
+        };
+        break;
+
+      default:
+        return;
+    }
+
+    if (newElement) {
+      setMapElements([...mapElements, newElement]);
+      setSelectedElement(newElement.id);
+      setSelectedTool('select');
+    }
+  };
+
+  const handleElementClick = (elementId, event) => {
+    event.stopPropagation();
+    if (selectedTool === 'select') {
+      setSelectedElement(elementId);
+    }
+  };
+
+  // Mouse events for dragging
+  const handleMouseDown = (elementId, event) => {
+    event.stopPropagation();
+    if (selectedTool === 'select' && elementId) {
+      setSelectedElement(elementId);
+      setIsDragging(true);
+      
+      const svg = event.currentTarget.closest('svg');
+      const rect = svg.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 1000;
+      const y = ((event.clientY - rect.top) / rect.height) * 600;
+      
+      setDragStart({ x, y });
+      
+      const element = mapElements.find(el => el.id === elementId);
+      if (element) {
+        setElementStartPos({ x: element.x, y: element.y });
+      }
+    }
+  };
+
+  const handleMouseMove = (event) => {
+    if (isDragging && selectedElement) {
+      const svg = event.currentTarget;
+      const rect = svg.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 1000;
+      const y = ((event.clientY - rect.top) / rect.height) * 600;
+      
+      const deltaX = x - dragStart.x;
+      const deltaY = y - dragStart.y;
+      
+      setMapElements(prevElements => 
+        prevElements.map(element => {
+          if (element.id === selectedElement) {
+            let newX = elementStartPos.x + deltaX;
+            let newY = elementStartPos.y + deltaY;
+            
+            // Apply boundaries based on element type
+            if (element.type === 'entrance') {
+              // For circles, keep center within bounds with radius
+              newX = Math.max(15, Math.min(985, newX));
+              newY = Math.max(15, Math.min(585, newY));
+            } else if (element.type === 'bathroom') {
+              // For centered rectangles, account for half width/height
+              const halfWidth = (element.width || 40) / 2;
+              const halfHeight = (element.height || 30) / 2;
+              newX = Math.max(halfWidth, Math.min(1000 - halfWidth, newX));
+              newY = Math.max(halfHeight, Math.min(600 - halfHeight, newY));
+            } else if (element.type === 'seat') {
+              // For seats, account for their offset
+              newX = Math.max(7, Math.min(993, newX));
+              newY = Math.max(6, Math.min(594, newY));
+            } else {
+              // For normal rectangles (zones, stages, rows, blocks)
+              newX = Math.max(0, Math.min(1000 - (element.width || 0), newX));
+              newY = Math.max(0, Math.min(600 - (element.height || 0), newY));
+            }
+            
+            return { ...element, x: newX, y: newY };
+          }
+          return element;
+        })
+      );
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Delete selected element
+  const deleteSelectedElement = () => {
+    if (selectedElement) {
+      setMapElements(mapElements.filter(el => el.id !== selectedElement));
+      setSelectedElement(null);
+    }
+  };
+
+  // Category utility functions
+  const getCategoryColor = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.color : '#3b82f6';
+  };
+
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : 'General';
+  };
+
+  // Auto-numbering utility functions
+  const generateRowLabel = (rowIndex) => {
+    if (rowIndex < 26) {
+      return String.fromCharCode(65 + rowIndex); // A-Z
+    } else {
+      const firstLetter = String.fromCharCode(65 + Math.floor(rowIndex / 26) - 1);
+      const secondLetter = String.fromCharCode(65 + (rowIndex % 26));
+      return firstLetter + secondLetter; // AA, AB, AC...
+    }
+  };
+
+  const generateSeatNumber = (seatIndex, isEvenOdd = false, direction = 'left-to-right') => {
+    if (isEvenOdd) {
+      // Odd numbers on left, even on right (common in theaters)
+      return seatIndex % 2 === 0 ? seatIndex + 1 : seatIndex + 2;
+    } else {
+      // Sequential numbering
+      return direction === 'left-to-right' ? seatIndex + 1 : seatIndex + 1;
+    }
+  };
+
+  // Auto-update row names when creating multiple rows
+  const updateRowNaming = () => {
+    const rowElements = mapElements.filter(el => el.type === 'row');
+    const updatedElements = mapElements.map(element => {
+      if (element.type === 'row') {
+        const rowIndex = rowElements.findIndex(row => row.id === element.id);
+        const newName = `Fila ${generateRowLabel(rowIndex)}`;
+        return { ...element, name: newName };
+      }
+      return element;
+    });
+    setMapElements(updatedElements);
+  };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (selectedElement) {
+          deleteSelectedElement();
+        }
+      } else if (event.key === 'Escape') {
+        setSelectedElement(null);
+        setSelectedTool('select');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedElement]);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -196,6 +573,22 @@ export default function EventDetailsPage() {
     if (activeTab === "transactions" && eventData && !transactionsData) {
       fetchTransactions();
       fetchAllTransactionsForChart();
+    }
+  }, [activeTab, eventData]);
+
+  // Fetch guest list when guestlist tab is active
+  useEffect(() => {
+    if (ticketsSubTab === "guestlist" && activeTab === "tickets" && eventData && !guestListData) {
+      fetchGuestList();
+      fetchGuestListKPIsData();
+    }
+  }, [ticketsSubTab, activeTab, eventData]);
+
+  // Fetch guest list when cortesias tab is active
+  useEffect(() => {
+    if (activeTab === "cortesias" && eventData && !guestListData) {
+      fetchGuestList();
+      fetchGuestListKPIsData();
     }
   }, [activeTab, eventData]);
 
@@ -623,30 +1016,96 @@ export default function EventDetailsPage() {
     }
   };
 
+  // Guest List functions
+  const fetchGuestList = async (
+    page: number = guestListPage,
+    search: string = guestListSearch,
+    statusFilter: string = guestListStatusFilter
+  ) => {
+    if (!params.id) return;
+    
+    setLoadingGuestList(true);
+    try {
+      const response = await getEventGuestList(
+        params.id,
+        page,
+        50, // limit
+        statusFilter,
+        search
+      );
+      setGuestListData(response);
+    } catch (error) {
+      console.error("Error fetching guest list:", error);
+    } finally {
+      setLoadingGuestList(false);
+    }
+  };
+
+  const fetchGuestListKPIsData = async () => {
+    if (!params.id) return;
+    
+    try {
+      const kpis = await getGuestListKPIs(params.id);
+      setGuestListKPIs(kpis);
+    } catch (error) {
+      console.error("Error fetching guest list KPIs:", error);
+      // Use mock data on error
+      setGuestListKPIs({
+        invitations: 124,
+        redeemed: 87,
+        revenue: 2850000,
+      });
+    }
+  };
+
+  const handleGuestListPageChange = (page: number) => {
+    setGuestListPage(page);
+    fetchGuestList(page, guestListSearch, guestListStatusFilter);
+  };
+
+  const handleGuestListSearch = (search: string) => {
+    setGuestListSearch(search);
+    setGuestListPage(1);
+    fetchGuestList(1, search, guestListStatusFilter);
+  };
+
+  const handleGuestListStatusFilter = (status: string) => {
+    setGuestListStatusFilter(status);
+    setGuestListPage(1);
+    fetchGuestList(1, guestListSearch, status);
+  };
+
   const tabs = [
-    { id: "overview", name: "Resumen", icon: "📊" },
-    { id: "settings", name: "Configuración", icon: "⚙️" },
-    { id: "analytics", name: "Analytics", icon: "📈" },
-    { id: "tickets", name: "Entradas", icon: "🎫" },
-    { id: "transactions", name: "Transacciones", icon: "💳" },
-    { id: "map", name: "Mapa", icon: "🗺️" },
+    { id: "overview", name: "Resumen", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
+    { id: "settings", name: "Configuración", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
+    { id: "analytics", name: "Analytics", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg> },
+    { id: "tickets", name: "Entradas", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg> },
+    { id: "cortesias", name: "Cortesías", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg> },
+    { id: "transactions", name: "Transacciones", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg> },
+    { id: "map", name: "Mapa", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
   ];
 
   const ticketsSubTabs = [
-    { id: "tickets", name: "Tickets", icon: "🎫" },
-    { id: "create", name: "Crear Tickets", icon: "➕" },
-    { id: "analytics", name: "Analytics", icon: "📊" },
-    { id: "lists", name: "Listas", icon: "📋" },
-    { id: "guestlist", name: "Guest List", icon: "👥" },
-    { id: "wallet", name: "Apple Wallet", icon: "📱" },
+    { id: "tickets", name: "Tickets", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg> },
+    { id: "create", name: "Crear Tickets", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg> },
+    { id: "analytics", name: "Analytics", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
+    { id: "lists", name: "Listas", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> },
+    { id: "guestlist", name: "Guest List", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg> },
+    { id: "wallet", name: "Apple Wallet", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> },
   ];
 
   const settingsSubTabs = [
-    { id: "basic", name: "Información Básica", icon: "ℹ️" },
-    { id: "tickets", name: "Configuración de Entradas", icon: "🎫" },
-    { id: "venue", name: "Información del Lugar", icon: "📍" },
-    { id: "resources", name: "Enlaces y Recursos", icon: "🔗" },
-    { id: "advanced", name: "Configuración Avanzada", icon: "⚙️" },
+    { id: "basic", name: "Información Básica", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
+    { id: "tickets", name: "Configuración de Entradas", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg> },
+    { id: "venue", name: "Información del Lugar", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
+    { id: "resources", name: "Enlaces y Recursos", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg> },
+    { id: "advanced", name: "Configuración Avanzada", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
+  ];
+
+  const cortesiasSubTabs = [
+    { id: "dashboard", name: "Dashboard", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
+    { id: "categorias", name: "Categorías de Cortesía", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg> },
+    { id: "configuracion", name: "Configuración", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
   ];
 
   const formatCurrency = (amount: number) => {
@@ -892,29 +1351,11 @@ export default function EventDetailsPage() {
           ))}
         </div>
 
-        {/* Balance Total KPI Box with Flyer - Outside tabs when analytics is active */}
+        {/* Balance Total KPI Box - Outside tabs when analytics is active */}
         {activeTab === "analytics" && (
           <div className="mb-8 space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Event Flyer */}
-              <div className="lg:col-span-1">
-                <div 
-                  className="relative w-2/5 rounded-2xl overflow-hidden bg-white/5 border border-white/10"
-                  style={{ aspectRatio: '1080/1350', maxHeight: '320px' }}
-                >
-                  <img
-                    src={event.flyer || blurImage.src}
-                    alt={event.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              {/* Balance Total KPI Box */}
-              <div className="lg:col-span-2">
-                <StatisticsCard5 salesData={salesStats} />
-              </div>
-            </div>
+            {/* Balance Total KPI Box */}
+            <StatisticsCard5 salesData={salesStats} />
 
             {/* Individual KPI Cards */}
             <StatisticsCard2 />
@@ -2933,29 +3374,191 @@ export default function EventDetailsPage() {
           )}
 
           {activeTab === "map" && (
-            <div className="h-full -m-8">
-              <VenueMapEditor
-                eventId={event.id}
-                onSave={(data) => {
-                  localStorage.setItem(`venue-map-${event.id}`, JSON.stringify(data));
-                  alert('Mapa guardado exitosamente!');
-                }}
-              />
+            <div className="h-[calc(100vh-160px)] bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.08] relative overflow-hidden p-4">
+                
+                {/* Vista Controls Badge - Top Right */}
+                <div className="absolute top-6 right-6 z-10">
+                  <div className="bg-white/[0.1] backdrop-blur-xl rounded-full border border-white/[0.15] p-2 shadow-lg">
+                    <div className="flex items-center gap-2">
+                      {/* Grid Toggle */}
+                      <button 
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                        title="Toggle Grid"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
+                      </button>
+                      
+                      {/* Separator */}
+                      <div className="w-px h-4 bg-white/20"></div>
+                      
+                      {/* Zoom Out */}
+                      <button 
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                        title="Zoom Out"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                        </svg>
+                      </button>
+                      
+                      {/* Separator */}
+                      <div className="w-px h-4 bg-white/20"></div>
+                      
+                      {/* Zoom In */}
+                      <button 
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                        title="Zoom In"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Área de construcción con SVG */}
+                <div className="bg-white/[0.02] rounded-xl overflow-hidden h-full relative">
+                  <svg 
+                    className={`w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-crosshair'}`} 
+                    viewBox="0 0 1000 600"
+                    style={{ minHeight: '500px' }}
+                    onClick={handleCanvasClick}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                  >
+                    <defs>
+                      {/* Grid pattern */}
+                      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#ffffff10" strokeWidth="1"/>
+                      </pattern>
+                      
+                      {/* Gradients for stage */}
+                      {mapElements.filter(el => el.type === 'stage' && el.stageGradient).map(element => (
+                        <linearGradient key={`stageGradient-${element.id}`} id={`stageGradient-${element.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor={element.stageBackgroundColor || '#ef4444'} stopOpacity="1" />
+                          <stop offset="100%" stopColor={element.stageBackgroundColor || '#ef4444'} stopOpacity="0.3" />
+                        </linearGradient>
+                      ))}
+                    </defs>
+
+                    {/* Grid background */}
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+
+                    {/* Map elements */}
+                    {mapElements.map(element => {
+                      const isSelected = selectedElement === element.id;
+                      
+                      // Render different element types
+                      if (element.type === 'rectangle') {
+                        return (
+                          <g key={element.id}>
+                            <rect
+                              x={element.x}
+                              y={element.y}
+                              width={element.width}
+                              height={element.height}
+                              fill={element.color || getCategoryColor(element.category || 'general')}
+                              fillOpacity="0.3"
+                              stroke={element.color || getCategoryColor(element.category || 'general')}
+                              strokeWidth={isSelected ? "3" : "2"}
+                              className="cursor-pointer"
+                              onClick={() => setSelectedElement(element.id)}
+                            />
+                            <text
+                              x={element.x + element.width / 2}
+                              y={element.y + element.height / 2}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fill="white"
+                              fontSize="12"
+                              fontWeight="500"
+                            >
+                              {element.name}
+                            </text>
+                          </g>
+                        );
+                      }
+                      
+                      return null;
+                    })}
+                  </svg>
+                  
+                  {/* Floating Sidebar Panel - Left Side */}
+                  <div className="absolute top-6 left-6 z-20 w-64 max-h-[calc(100vh-320px)] overflow-y-auto">
+                    <div className="bg-white/[0.08] backdrop-blur-xl rounded-xl border border-white/[0.12] p-4 shadow-2xl">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-white font-medium">Elementos</h3>
+                        <span className="text-white/60 text-xs">{mapElements.length}</span>
+                      </div>
+                      
+                      {mapElements.length === 0 ? (
+                        <div className="text-center py-6 text-white/60">
+                          <div className="text-2xl mb-2">📍</div>
+                          <p className="text-sm">No hay elementos</p>
+                          <p className="text-xs text-white/40">Usa las herramientas para crear elementos</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {mapElements.map((element) => (
+                            <div
+                              key={element.id}
+                              onClick={() => setSelectedElement(element.id)}
+                              className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                                selectedElement === element.id
+                                  ? 'bg-blue-600/30 border border-blue-500/50 shadow-lg'
+                                  : 'bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex-shrink-0">
+                                  <div className="w-4 h-4 bg-blue-500 rounded-sm" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-white text-sm font-medium truncate">{element.name}</div>
+                                  <div className="text-white/60 text-xs">{element.type}</div>
+                                </div>
+                                {selectedElement === element.id && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteElement(element.id);
+                                    }}
+                                    className="flex-shrink-0 p-1 text-white/60 hover:text-red-400 hover:bg-red-500/20 rounded transition-all"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
           )}
 
-          {activeTab === "tickets" && (
+          {activeTab === "cortesias" && (
           <div className="mt-8">
             <div className="flex gap-8">
               {/* Vertical Sub-tabs Navigation */}
               <div className="w-64 flex-shrink-0">
                 <div className="space-y-2">
-                  {ticketsSubTabs.map((subTab) => (
+                  {cortesiasSubTabs.map((subTab) => (
                     <button
                       key={subTab.id}
-                      onClick={() => setTicketsSubTab(subTab.id)}
+                      onClick={() => setCortesiasSubTab(subTab.id)}
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
-                        ticketsSubTab === subTab.id
+                        cortesiasSubTab === subTab.id
                           ? "bg-white/10 text-white border border-white/20 shadow-lg"
                           : "text-white/60 hover:text-white hover:bg-white/5"
                       }`}
@@ -2969,180 +3572,114 @@ export default function EventDetailsPage() {
 
               {/* Sub-tabs Content */}
               <div className="flex-1 space-y-6">
-              {ticketsSubTab === "tickets" && (
+              {cortesiasSubTab === "dashboard" && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-semibold text-white">Gestión de Tickets</h2>
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
-                      + Nuevo Ticket
+                  {/* Guest List Table */}
+                  <GuestListTable
+                    data={guestListData?.data || []}
+                    loading={loadingGuestList}
+                    currentPage={guestListPage}
+                    totalPages={guestListData?.pagination.pages || 1}
+                    totalItems={guestListData?.pagination.total || 0}
+                    onPageChange={handleGuestListPageChange}
+                    onSearch={handleGuestListSearch}
+                    onStatusFilter={handleGuestListStatusFilter}
+                    guestListKPIs={guestListKPIs}
+                  />
+                </div>
+              )}
+
+              {cortesiasSubTab === "categorias" && (
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-semibold text-white">Categorías de Cortesía</h2>
+                      <p className="text-white/60 mt-1">Gestiona las categorías disponibles para invitaciones</p>
+                    </div>
+                    <button
+                      onClick={() => setShowNewCategoryModal(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-lg text-gray-800 hover:text-white transition-all duration-300 group"
+                    >
+                      <svg className="w-4 h-4 group-hover:scale-105 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="text-sm font-medium">Nueva Categoría</span>
                     </button>
                   </div>
-                  
+
+                  {/* Categories Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
-                      <h3 className="text-lg font-medium text-white mb-2">General</h3>
-                      <p className="text-white/60 text-sm mb-4">$50.000 • 100 disponibles</p>
-                      <div className="flex gap-2">
-                        <button className="text-blue-400 hover:text-blue-300 text-sm">Editar</button>
-                        <button className="text-red-400 hover:text-red-300 text-sm">Eliminar</button>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
-                      <h3 className="text-lg font-medium text-white mb-2">VIP</h3>
-                      <p className="text-white/60 text-sm mb-4">$100.000 • 50 disponibles</p>
-                      <div className="flex gap-2">
-                        <button className="text-blue-400 hover:text-blue-300 text-sm">Editar</button>
-                        <button className="text-red-400 hover:text-red-300 text-sm">Eliminar</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {ticketsSubTab === "create" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-semibold text-white">Crear Nuevo Ticket</h2>
-                  
-                  <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-8 border border-white/[0.08]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-white/80 text-sm font-medium mb-2">Nombre del Ticket</label>
-                        <input
-                          type="text"
-                          placeholder="Ej: Entrada General"
-                          className="w-full h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-white/50 focus:bg-white/10 focus:border-white/20 focus:outline-none"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-white/80 text-sm font-medium mb-2">Precio</label>
-                        <input
-                          type="number"
-                          placeholder="50000"
-                          className="w-full h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-white/50 focus:bg-white/10 focus:border-white/20 focus:outline-none"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-white/80 text-sm font-medium mb-2">Cantidad</label>
-                        <input
-                          type="number"
-                          placeholder="100"
-                          className="w-full h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-white/50 focus:bg-white/10 focus:border-white/20 focus:outline-none"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-white/80 text-sm font-medium mb-2">Descripción</label>
-                        <textarea
-                          placeholder="Descripción del ticket..."
-                          className="w-full h-20 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-white/50 focus:bg-white/10 focus:border-white/20 focus:outline-none resize-none"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 flex gap-3">
-                      <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
-                        Crear Ticket
-                      </button>
-                      <button className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors">
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {ticketsSubTab === "analytics" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-semibold text-white">Analytics de Tickets</h2>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
-                      <h3 className="text-lg font-medium text-white mb-2">Tickets Vendidos</h3>
-                      <p className="text-3xl font-bold text-white">150</p>
-                      <p className="text-white/60 text-sm">de 200 total</p>
-                    </div>
-                    
-                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
-                      <h3 className="text-lg font-medium text-white mb-2">Ingresos</h3>
-                      <p className="text-3xl font-bold text-green-400">$7.500.000</p>
-                      <p className="text-white/60 text-sm">Total recaudado</p>
-                    </div>
-                    
-                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
-                      <h3 className="text-lg font-medium text-white mb-2">Tasa de Conversión</h3>
-                      <p className="text-3xl font-bold text-blue-400">75%</p>
-                      <p className="text-white/60 text-sm">Visitantes que compraron</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {ticketsSubTab === "lists" && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-semibold text-white">Listas de Asistentes</h2>
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
-                      Exportar Lista
-                    </button>
-                  </div>
-                  
-                  <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-white/10">
-                            <th className="text-left py-3 px-4 text-white/80 font-medium text-sm">Nombre</th>
-                            <th className="text-left py-3 px-4 text-white/80 font-medium text-sm">Email</th>
-                            <th className="text-left py-3 px-4 text-white/80 font-medium text-sm">Ticket</th>
-                            <th className="text-left py-3 px-4 text-white/80 font-medium text-sm">Estado</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b border-white/5">
-                            <td className="py-3 px-4 text-white/90">Juan Pérez</td>
-                            <td className="py-3 px-4 text-white/70">juan@ejemplo.com</td>
-                            <td className="py-3 px-4 text-white/70">General</td>
-                            <td className="py-3 px-4">
-                              <span className="px-2 py-1 bg-green-600/20 text-green-400 rounded-full text-xs">Confirmado</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {ticketsSubTab === "guestlist" && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-semibold text-white">Guest List</h2>
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
-                      + Agregar Invitado
-                    </button>
-                  </div>
-                  
-                  <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
-                    <div className="mb-4">
-                      <input
-                        type="text"
-                        placeholder="Buscar invitados..."
-                        className="w-full h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-white/50 focus:bg-white/10 focus:border-white/20 focus:outline-none"
-                      />
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                        <div>
-                          <p className="text-white font-medium">María García</p>
-                          <p className="text-white/60 text-sm">maria@ejemplo.com</p>
+                    {/* Category Card - VIP */}
+                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.08] p-6 hover:bg-white/[0.06] transition-all duration-300">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center">
+                            <span className="text-white text-lg font-bold">V</span>
+                          </div>
+                          <div>
+                            <h3 className="text-white font-semibold">VIP</h3>
+                            <p className="text-white/60 text-sm">Premium access</p>
+                          </div>
                         </div>
                         <div className="flex gap-2">
-                          <span className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded-full text-xs">VIP</span>
-                          <button className="text-red-400 hover:text-red-300 text-sm">Remover</button>
+                          <button className="text-white/60 hover:text-blue-400 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button className="text-white/60 hover:text-red-400 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Invitaciones enviadas:</span>
+                          <span className="text-white font-medium">24</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Confirmadas:</span>
+                          <span className="text-green-400 font-medium">18</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Category Card - General */}
+                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.08] p-6 hover:bg-white/[0.06] transition-all duration-300">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+                            <span className="text-white text-lg font-bold">G</span>
+                          </div>
+                          <div>
+                            <h3 className="text-white font-semibold">General</h3>
+                            <p className="text-white/60 text-sm">Standard access</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="text-white/60 hover:text-blue-400 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button className="text-white/60 hover:text-red-400 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Invitaciones enviadas:</span>
+                          <span className="text-white font-medium">42</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Confirmadas:</span>
+                          <span className="text-green-400 font-medium">35</span>
                         </div>
                       </div>
                     </div>
@@ -3150,22 +3687,12 @@ export default function EventDetailsPage() {
                 </div>
               )}
 
-              {ticketsSubTab === "wallet" && (
-                <div>
-                  <AppleWalletCustomizer 
-                    eventData={eventData.event}
-                    onSave={(config) => {
-                      // Save configuration to localStorage
-                      const key = `wallet-pass-config-${eventData.event.id}`;
-                      localStorage.setItem(key, JSON.stringify(config));
-                      
-                      // Show success message (you could use a toast notification here)
-                      alert('Configuración de Apple Wallet guardada exitosamente!');
-                      
-                      // In the future, this could also save to your backend:
-                      // await saveWalletPassConfig(eventData.event.id, config);
-                    }}
-                  />
+              {cortesiasSubTab === "configuracion" && (
+                <div className="space-y-6">
+                  <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.08] p-6">
+                    <h3 className="text-white font-semibold mb-4">Configuración de Cortesías</h3>
+                    <p className="text-white/60">Configuración de cortesías próximamente...</p>
+                  </div>
                 </div>
               )}
               </div>
@@ -3173,9 +3700,51 @@ export default function EventDetailsPage() {
           </div>
         )}
 
+      {/* Modal para Nueva Categoría */}
+      {showNewCategoryModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-8 w-full max-w-md mx-4">
+            <h3 className="text-xl font-semibold text-white">Nueva Categoría</h3>
+            <p className="text-white/60 mt-2 mb-6">Crea una nueva categoría de cortesía</p>
+            
+            {/* Formulario */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-white/80 text-sm font-medium mb-2">Nombre de la categoría</label>
+                <input
+                  type="text"
+                  placeholder="Ej: VIP, General, Prensa"
+                  className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:bg-white/10 focus:border-white/20 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-white/80 text-sm font-medium mb-2">Descripción</label>
+                <textarea
+                  placeholder="Descripción de la categoría"
+                  rows={3}
+                  className="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:bg-white/10 focus:border-white/20 focus:outline-none resize-none"
+                />
+              </div>
+            </div>
+            
+            {/* Botones */}
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => setShowNewCategoryModal(false)}
+                className="flex-1 h-12 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-xl text-white font-medium transition-all duration-200"
+              >
+                Cancelar
+              </button>
+              <button
+                className="flex-1 h-12 bg-white hover:bg-gray-100 rounded-xl text-gray-800 font-medium transition-all duration-200"
+              >
+                Crear Categoría
+              </button>
+            </div>
+          </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 }
