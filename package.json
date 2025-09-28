@@ -45,7 +45,7 @@
     "lucide-react": "^0.276.0",
     "maplibre-gl": "^5.1.1",
     "motion": "^12.23.12",
-    "next": "15.0.3",
+    "next": "^15.4.6",
     "primereact": "^10.9.2",
     "qrcode.react": "^4.2.0",
     "react": "18.2.0",
