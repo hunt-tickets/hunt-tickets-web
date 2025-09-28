@@ -106,7 +106,7 @@ export type SeatStates = {
 };
 
 // Tab Types
-export type TabType = "overview" | "transactions" | "guest-list" | "tickets" | "settings" | "cortesias";
+export type TabType = "overview" | "transactions" | "guest-list" | "tickets" | "settings" | "cortesias" | "map" | "analytics";
 export type TicketsSubTab = "tickets" | "categories" | "pricing";
 export type SettingsSubTab = "basic" | "map" | "apple-wallet";
 export type CortesiasSubTab = "dashboard" | "create" | "settings";
