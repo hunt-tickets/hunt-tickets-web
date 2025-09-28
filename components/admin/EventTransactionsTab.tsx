@@ -559,7 +559,7 @@ export default function EventTransactionsTab({ eventId, activeTab }: EventTransa
         {transactionsData?.pagination && (
           <div className="flex items-center justify-between mt-6">
             <div className="text-white/60 text-sm">
-              Mostrando {filteredTransactions.length} de {transactionsData.pagination.total_items} transacciones
+              Mostrando {filteredTransactions.length} de {transactionsData.pagination.total_records} transacciones
             </div>
             <div className="flex items-center gap-4">
               <button

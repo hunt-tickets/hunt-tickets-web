@@ -17,7 +17,7 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
     { id: 'platinum', type: 'zone', x: 500, y: 300, width: 150, height: 80, name: 'Platinum', color: '#8b5cf6', seats: 40 }
   ]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [selectedElement, setSelectedElement] = useState(null);
+  const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [elementStartPos, setElementStartPos] = useState({ x: 0, y: 0 });
@@ -302,8 +302,9 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
             newY = Math.max(6, Math.min(594, newY));
           } else if (element.type === 'table') {
             // For tables, account for radius
-            newX = Math.max(element.radius, Math.min(1000 - element.radius, newX));
-            newY = Math.max(element.radius, Math.min(600 - element.radius, newY));
+            const radius = (element as any).radius || 40;
+            newX = Math.max(radius, Math.min(1000 - radius, newX));
+            newY = Math.max(radius, Math.min(600 - radius, newY));
           } else {
             // For normal rectangles (zones, stages, rows, blocks, sections)
             newX = Math.max(0, Math.min(1000 - (element.width || 0), newX));
@@ -443,10 +444,10 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
             </pattern>
             
             {/* Gradients for stage */}
-            {mapElements.filter(el => el.type === 'stage' && el.stageGradient).map(element => (
+            {mapElements.filter(el => el.type === 'stage' && (el as any).stageGradient).map(element => (
               <linearGradient key={`stageGradient-${element.id}`} id={`stageGradient-${element.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor={element.stageBackgroundColor || '#ef4444'} stopOpacity="1" />
-                <stop offset="100%" stopColor={element.stageBackgroundColor || '#ef4444'} stopOpacity="0.3" />
+                <stop offset="0%" stopColor={(element as any).stageBackgroundColor || '#ef4444'} stopOpacity="1" />
+                <stop offset="100%" stopColor={(element as any).stageBackgroundColor || '#ef4444'} stopOpacity="0.3" />
               </linearGradient>
             ))}
           </defs>
@@ -456,11 +457,12 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
 
           {/* Map elements */}
           {mapElements.map(element => {
+            const el = element as any; // Cast to any to access dynamic properties
             const isSelected = selectedElement === element.id;
             
             // Render zone types (rectangle and circle)
             if (element.type === 'zone') {
-              if (element.shape === 'circle') {
+              if (el.shape === 'circle') {
                 return (
                   <g key={element.id}>
                     <circle
@@ -585,9 +587,10 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
             }
 
             if (element.type === 'row') {
+              const elementAny = element as any;
               const seats = [];
-              for (let i = 0; i < element.seatsPerRow; i++) {
-                const seatX = element.x + (i * element.seatSpacing);
+              for (let i = 0; i < elementAny.seatsPerRow; i++) {
+                const seatX = element.x + (i * elementAny.seatSpacing);
                 const seatY = element.y;
                 seats.push(
                   <rect
@@ -630,15 +633,15 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
                     fontWeight="bold"
                     className="pointer-events-none select-none"
                   >
-                    {element.rowLetter}
+                    {elementAny.rowLetter}
                   </text>
                   {/* Individual seats */}
                   {seats}
                   {/* Seat numbers */}
-                  {Array.from({ length: element.seatsPerRow }, (_, i) => (
+                  {Array.from({ length: elementAny.seatsPerRow }, (_, i) => (
                     <text
                       key={`number-${i}`}
-                      x={element.x + (i * element.seatSpacing) + 6}
+                      x={element.x + (i * elementAny.seatSpacing) + 6}
                       y={element.y + element.height + 12}
                       textAnchor="middle"
                       dominantBaseline="middle"
@@ -646,7 +649,7 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
                       fontSize="8"
                       className="pointer-events-none select-none"
                     >
-                      {generateSeatNumber(i, element.isEvenOdd, element.numberingDirection)}
+                      {generateSeatNumber(i, elementAny.isEvenOdd, elementAny.numberingDirection)}
                     </text>
                   ))}
                 </g>
@@ -654,10 +657,11 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
             }
 
             if (element.type === 'table') {
-              const seats = element.seatsAroundTable.map((seat, index) => {
+              const elementAny = element as any;
+              const seats = elementAny.seatsAroundTable.map((seat: any, index: number) => {
                 const angleRad = (seat.angle * Math.PI) / 180;
-                const seatX = element.x + Math.cos(angleRad) * element.radius;
-                const seatY = element.y + Math.sin(angleRad) * element.radius;
+                const seatX = element.x + Math.cos(angleRad) * elementAny.radius;
+                const seatY = element.y + Math.sin(angleRad) * elementAny.radius;
                 
                 return (
                   <circle
@@ -679,7 +683,7 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
                   <circle
                     cx={element.x}
                     cy={element.y}
-                    r={element.radius * 0.6}
+                    r={elementAny.radius * 0.6}
                     fill="#92400e"
                     stroke={isSelected ? "#ffffff" : "#451a03"}
                     strokeWidth={isSelected ? 3 : 2}
@@ -698,7 +702,7 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
                     fontWeight="bold"
                     className="pointer-events-none select-none"
                   >
-                    {element.tableNumber}
+                    {elementAny.tableNumber}
                   </text>
                 </g>
               );
@@ -755,9 +759,9 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
                     y={element.y}
                     width={element.width}
                     height={element.height}
-                    fill={getCategoryColor(element.category || 'general')}
+                    fill={getCategoryColor(el.category || 'general')}
                     fillOpacity="0.2"
-                    stroke={isSelected ? "#ffffff" : getCategoryColor(element.category || 'general')}
+                    stroke={isSelected ? "#ffffff" : getCategoryColor(el.category || 'general')}
                     strokeWidth={isSelected ? 3 : 2}
                     strokeDasharray="5,5"
                     rx="12"
@@ -785,7 +789,7 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
                     fontSize="10"
                     className="pointer-events-none select-none"
                   >
-                    {element.isGeneralAdmission ? `Capacidad: ${element.capacity}` : `${element.totalSeats} asientos`}
+                    {el.isGeneralAdmission ? `Capacidad: ${el.capacity}` : `${el.totalSeats} asientos`}
                   </text>
                 </g>
               );
@@ -894,20 +898,23 @@ export default function EventMapTab({ eventId, activeTab }: EventMapTabProps) {
                            element.type === 'section' ? '📦' :
                            element.type === 'entrance' ? '🚪' :
                            element.type === 'bathroom' ? '🚻' :
-                           element.type === 'zone' && element.shape === 'circle' ? '⭕' :
+                           element.type === 'zone' && (element as any).shape === 'circle' ? '⭕' :
                            '⬛'}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-white text-sm font-medium truncate">{element.name}</div>
                         <div className="text-white/60 text-xs">
-                          {element.type === 'zone' && element.shape === 'circle' ? 'zona circular' :
-                           element.type === 'zone' ? 'zona rectangular' :
-                           element.type === 'row' ? `${element.seatsPerRow} asientos` :
-                           element.type === 'table' ? `${element.seats} puestos` :
-                           element.type === 'block' ? `${element.seats} asientos` :
-                           element.type === 'section' ? (element.isGeneralAdmission ? `cap. ${element.capacity}` : `${element.totalSeats} asientos`) :
-                           element.type}
+                          {(() => {
+                            const el = element as any;
+                            return el.type === 'zone' && el.shape === 'circle' ? 'zona circular' :
+                                   el.type === 'zone' ? 'zona rectangular' :
+                                   el.type === 'row' ? `${el.seatsPerRow} asientos` :
+                                   el.type === 'table' ? `${el.seats} puestos` :
+                                   el.type === 'block' ? `${el.seats} asientos` :
+                                   el.type === 'section' ? (el.isGeneralAdmission ? `cap. ${el.capacity}` : `${el.totalSeats} asientos`) :
+                                   el.type;
+                          })()}
                         </div>
                       </div>
                       {selectedElement === element.id && (

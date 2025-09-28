@@ -28,7 +28,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
   useEffect(() => {
     setMapElements(prevElements => {
       let letterIndex = 0;
-      return prevElements.map(el => {
+      return prevElements.map((el: any) => {
         if (el.type === 'row') {
           if (!el.rowLetter) {
             const letter = String.fromCharCode(65 + letterIndex);
@@ -53,7 +53,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
           }
         }
         return el;
-      });
+      }) as any;
     });
   }, []);
 
@@ -283,8 +283,9 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
           
           // Apply boundaries
           if (element.type === 'table') {
-            newX = Math.max(element.radius || 40, Math.min(1000 - (element.radius || 40), newX));
-            newY = Math.max(element.radius || 40, Math.min(600 - (element.radius || 40), newY));
+            const radius = (element as any).radius || 40;
+            newX = Math.max(radius, Math.min(1000 - radius, newX));
+            newY = Math.max(radius, Math.min(600 - radius, newY));
           } else {
             newX = Math.max(0, Math.min(1000 - (element.width || 0), newX));
             newY = Math.max(0, Math.min(600 - (element.height || 0), newY));
@@ -483,7 +484,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                           {element.type === 'stage' ? '🎭' :
                            element.type === 'row' ? '📏' :
                            element.type === 'table' ? '🪑' :
-                           element.type === 'zone' && element.shape === 'circle' ? '⭕' :
+                           element.type === 'zone' && (element as any).shape === 'circle' ? '⭕' :
                            '⬛'}
                         </span>
                       </div>
@@ -555,7 +556,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
               const isSelected = selectedElement === element.id;
               
               if (element.type === 'zone') {
-                if (element.shape === 'circle') {
+                if ((element as any).shape === 'circle') {
                   return (
                     <g key={element.id}>
                       <circle
@@ -651,16 +652,17 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
               }
 
               if (element.type === 'row') {
+                const el = element as any;
                 const renderSeats = () => {
                   const allSeats = [];
-                  const seatsPerRow = element.seatsPerRow || 10;
-                  const rowLines = element.rowLines || 1;
-                  const seatSpacing = element.seatSpacing || 16;
-                  const seatWidth = element.seatWidth || 14;
-                  const seatHeight = element.seatHeight || 12;
-                  const startNumber = element.startNumber || 1;
-                  const gap = element.configuration?.gap || 0;
-                  const groupSize = element.configuration?.groupSize || 0;
+                  const seatsPerRow = el.seatsPerRow || 10;
+                  const rowLines = el.rowLines || 1;
+                  const seatSpacing = el.seatSpacing || 16;
+                  const seatWidth = el.seatWidth || 14;
+                  const seatHeight = el.seatHeight || 12;
+                  const startNumber = el.startNumber || 1;
+                  const gap = el.configuration?.gap || 0;
+                  const groupSize = el.configuration?.groupSize || 0;
                   
                   for (let line = 0; line < rowLines; line++) {
                     const lineY = element.y + (line * (seatHeight + 4));
@@ -845,13 +847,13 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                       {element.type === 'stage' ? '🎭' :
                        element.type === 'row' ? '📏' :
                        element.type === 'table' ? '🪑' :
-                       element.type === 'zone' && element.shape === 'circle' ? '⭕' :
+                       element.type === 'zone' && (element as any).shape === 'circle' ? '⭕' :
                        '⬛'}
                     </span>
                     <div>
                       <div className="text-white font-medium">{element.name}</div>
                       <div className="text-white/60 text-sm capitalize">
-                        {element.type === 'zone' && element.shape === 'circle' ? 'Circle Zone' :
+                        {element.type === 'zone' && (element as any).shape === 'circle' ? 'Circle Zone' :
                          element.type === 'zone' ? 'Rectangle Zone' :
                          element.type === 'row' ? 'Seat Row' :
                          element.type === 'table' ? 'Table' :

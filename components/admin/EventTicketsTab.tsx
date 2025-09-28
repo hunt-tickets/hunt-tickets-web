@@ -295,7 +295,7 @@ export default function EventTicketsTab({ eventId, activeTab }: EventTicketsTabP
                   onPageChange={handleGuestListPageChange}
                   onSearch={handleGuestListSearch}
                   onStatusFilter={handleGuestListStatusFilter}
-                  guestListKPIs={guestListKPIs}
+                  guestListKPIs={guestListKPIs || undefined}
                 />
               </div>
             )}
