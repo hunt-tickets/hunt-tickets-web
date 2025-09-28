@@ -18,7 +18,8 @@ export default function EventDetailsPage() {
   const [ticketsSubTab] = useState<TicketsSubTab>("tickets");
 
   // Custom hooks for data management
-  const { eventData, salesStats, loading, error } = useEventData(params.id);
+  const eventId = Array.isArray(params.id) ? params.id[0] : params.id || "";
+  const { eventData, salesStats, loading, error } = useEventData(eventId);
 
   // Loading state
   if (loading) {
