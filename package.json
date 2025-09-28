@@ -48,11 +48,11 @@
     "next": "^15.4.6",
     "primereact": "^10.9.2",
     "qrcode.react": "^4.2.0",
-    "react": "18.2.0",
+    "react": "^18.3.1",
     "react-aria-components": "^1.11.0",
     "react-calendar": "^5.1.0",
     "react-date-picker": "^11.0.0",
-    "react-dom": "18.2.0",
+    "react-dom": "^18.3.1",
     "react-konva": "^19.0.7",
     "react-loader-spinner": "^6.1.6",
     "react-modern-drawer": "^1.4.0",
@@ -67,7 +67,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "@types/react": "19.0.1",
+    "@types/react": "^18.3.12",
     "@types/react-slick": "^0.23.13",
     "autoprefixer": "^10.4.15",
     "eslint": "^9.17.0",
