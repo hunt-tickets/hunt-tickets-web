@@ -66,32 +66,32 @@ export default function EventDetailsPage() {
         
       case "transactions":
         return (
-          <EventTransactionsTab 
-            eventId={params.id}
+          <EventTransactionsTab
+            eventId={eventId}
             activeTab={activeTab}
           />
         );
         
       case "tickets":
         return (
-          <EventTicketsTab 
-            eventId={params.id}
+          <EventTicketsTab
+            eventId={eventId}
             activeTab={activeTab}
           />
         );
         
       case "cortesias":
         return (
-          <EventCourtesiesTab 
-            eventId={params.id}
+          <EventCourtesiesTab
+            eventId={eventId}
             activeTab={activeTab}
           />
         );
         
       case "map":
         return (
-          <FigmaStyleMapEditor 
-            eventId={params.id}
+          <FigmaStyleMapEditor
+            eventId={eventId}
             activeTab={activeTab}
           />
         );
