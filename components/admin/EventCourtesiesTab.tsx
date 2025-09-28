@@ -71,7 +71,7 @@ export default function EventCourtesiesTab({ eventId, activeTab }: EventCourtesi
                   onPageChange={handleGuestListPageChange}
                   onSearch={handleGuestListSearch}
                   onStatusFilter={handleGuestListStatusFilter}
-                  guestListKPIs={guestListKPIs}
+                  guestListKPIs={guestListKPIs || undefined}
                 />
               </div>
             )}

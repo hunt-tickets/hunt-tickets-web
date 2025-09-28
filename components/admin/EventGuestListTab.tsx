@@ -62,18 +62,22 @@ export default function EventGuestListTab({ eventId, activeTab, ticketsSubTab }:
 
       {/* KPIs */}
       {guestListKPIs && (
-        <GuestListKPIs 
-          invitations={guestListKPIs.invitations}
-          redeemed={guestListKPIs.redeemed}
-          revenue={guestListKPIs.revenue}
+        <GuestListKPIs
+          guestListData={guestListKPIs}
         />
       )}
 
       {/* Guest List Table */}
       {guestListData ? (
-        <GuestListTable 
-          data={guestListData}
+        <GuestListTable
+          data={guestListData.data}
+          loading={loadingGuestList}
+          currentPage={1}
+          totalPages={guestListData.pagination.pages}
+          totalItems={guestListData.pagination.total}
           onPageChange={handleGuestListPageChange}
+          onSearch={() => {}}
+          onStatusFilter={() => {}}
         />
       ) : (
         <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl p-6 border border-white/[0.08]">
