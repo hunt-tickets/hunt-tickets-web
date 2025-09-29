@@ -205,7 +205,7 @@ export const ColorPickerSelection = ({
   );
 };
 
-export type ColorPickerHueProps = HTMLAttributes<HTMLDivElement>;
+export type ColorPickerHueProps = Omit<HTMLAttributes<HTMLDivElement>, 'dir' | 'defaultValue'>;
 
 export const ColorPickerHue = ({
   className,

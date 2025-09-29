@@ -142,10 +142,11 @@ export function useTransactions(eventId: string | string[], activeTab: string) {
       // Create proper pagination response
       const paginatedResponse = {
         data: pageData,
+        is_admin: true, // Add missing required property
         pagination: {
           page: currentPage,
           page_size: pageSize,
-          total_items: totalFilteredItems,
+          total_records: totalFilteredItems,
           total_pages: totalPages,
           has_previous: currentPage > 1,
           has_next: currentPage < totalPages

@@ -78,7 +78,7 @@ export function HuntGridMotion({ className }: HuntGridMotionProps) {
   ];
 
   // Combinar imágenes y textos alternadamente
-  const combinedItems = [];
+  const combinedItems: (string | any)[] = [];
   for (let i = 0; i < 28; i++) {
     if (i % 3 === 0) {
       // Cada 3 elementos, usar texto
@@ -145,7 +145,7 @@ export function HuntGridMotion({ className }: HuntGridMotionProps) {
             <div
               key={rowIndex}
               className="grid gap-4 grid-cols-[repeat(7,1fr)] will-change-transform will-change-filter"
-              ref={(el) => (rowRefs.current[rowIndex] = el)}
+              ref={(el) => { rowRefs.current[rowIndex] = el; }}
             >
               {[...Array(7)].map((_, itemIndex) => {
                 const content = combinedItems[rowIndex * 7 + itemIndex]

@@ -176,7 +176,7 @@ const AppleWalletCustomizer = ({ eventData, onSave }: AppleWalletCustomizerProps
                       <PopoverContent className="w-80 bg-[#1a1a1a] border-white/20">
                         <ColorPicker 
                           value={config.backgroundColor}
-                          onChange={(color) => updateConfig('backgroundColor', color)}
+                          onChange={(color) => updateConfig('backgroundColor', typeof color === 'string' ? color : '')}
                           className="w-full"
                         >
                           <ColorPickerSelection />
@@ -217,7 +217,7 @@ const AppleWalletCustomizer = ({ eventData, onSave }: AppleWalletCustomizerProps
                       <PopoverContent className="w-80 bg-[#1a1a1a] border-white/20">
                         <ColorPicker 
                           value={config.foregroundColor}
-                          onChange={(color) => updateConfig('foregroundColor', color)}
+                          onChange={(color) => updateConfig('foregroundColor', typeof color === 'string' ? color : '')}
                           className="w-full"
                         >
                           <ColorPickerSelection />
@@ -258,7 +258,7 @@ const AppleWalletCustomizer = ({ eventData, onSave }: AppleWalletCustomizerProps
                       <PopoverContent className="w-80 bg-[#1a1a1a] border-white/20">
                         <ColorPicker 
                           value={config.labelColor}
-                          onChange={(color) => updateConfig('labelColor', color)}
+                          onChange={(color) => updateConfig('labelColor', typeof color === 'string' ? color : '')}
                           className="w-full"
                         >
                           <ColorPickerSelection />

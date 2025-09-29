@@ -400,7 +400,7 @@ export const FigmaVenueEditor: React.FC<FigmaVenueEditorProps> = ({
             onUpdate={updateElement}
             onSelectionChange={handleSelectionChange}
             onViewportChange={handleViewportChange}
-            onStateChange={setEditorState}
+            onStateChange={(partialState) => setEditorState(prev => ({ ...prev, ...partialState }))}
           />
         </div>
 

@@ -517,7 +517,7 @@ export const FigmaVenueEditorPro: React.FC<FigmaVenueEditorProProps> = ({
       setIsDrawing(true);
       setDragStart({ x, y });
     }
-  }, [activeTool, getElementAtPoint, getSeatAtPoint, screenToCanvas, panOffset, updateElement]);
+  }, [activeTool, getElementAtPoint, getSeatAtPoint, screenToCanvas, panOffset]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -539,7 +539,7 @@ export const FigmaVenueEditorPro: React.FC<FigmaVenueEditorProProps> = ({
       
       updateElement(selectedElement, { x: newX, y: newY });
     }
-  }, [isPanning, isDragging, selectedElement, dragStart, dragOffset, screenToCanvas, updateElement]);
+  }, [isPanning, isDragging, selectedElement, dragStart, dragOffset, screenToCanvas]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -1312,7 +1312,7 @@ export const FigmaVenueEditorPro: React.FC<FigmaVenueEditorProProps> = ({
                   {generateSeatLabel(String.fromCharCode(seatConfig.startRow.charCodeAt(0) + 1), seatConfig.startNumber, seatConfig.format)}...
                 </div>
                 <div className="text-white/60 text-xs mt-2">
-                  Total: {seatConfig.rows × seatConfig.seatsPerRow} sillas
+                  Total: {seatConfig.rows * seatConfig.seatsPerRow} sillas
                 </div>
               </div>
 

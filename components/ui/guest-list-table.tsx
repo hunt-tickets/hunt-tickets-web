@@ -196,7 +196,7 @@ export default function GuestListTable({
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      {getStatusBadge(item.status, item.scan, item.late_fee_sent_at)}
+                      {getStatusBadge(item.status, item.scan, item.late_fee_status)}
                     </td>
                     <td className="py-4 px-4">
                       <div>
@@ -205,9 +205,9 @@ export default function GuestListTable({
                         ) : (
                           <span className="text-red-400 text-sm">✗ No enviado</span>
                         )}
-                        {item.confirmation_sent_at && (
+                        {(item as any).confirmation_sent_at && (
                           <p className="text-white/50 text-xs">
-                            Confirmado: {formatDate(item.confirmation_sent_at)}
+                            Confirmado: {formatDate((item as any).confirmation_sent_at)}
                           </p>
                         )}
                       </div>

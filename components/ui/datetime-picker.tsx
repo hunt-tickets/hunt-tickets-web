@@ -12,7 +12,7 @@ interface Day {
   isSelected: boolean;
 }
 
-interface DateTimePickerProps extends React.HTMLAttributes<HTMLDivElement> {
+interface DateTimePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value?: string;
   onChange?: (value: string) => void;
   className?: string;

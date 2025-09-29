@@ -22,7 +22,7 @@ export function useGuestList(eventId: string | string[], activeTab: string, tick
     setLoadingGuestList(true);
     try {
       const response = await getEventGuestList(
-        eventId,
+        Array.isArray(eventId) ? eventId[0] : eventId,
         page,
         50, // limit
         statusFilter,
@@ -40,7 +40,7 @@ export function useGuestList(eventId: string | string[], activeTab: string, tick
     if (!eventId) return;
     
     try {
-      const kpis = await getGuestListKPIs(eventId);
+      const kpis = await getGuestListKPIs(Array.isArray(eventId) ? eventId[0] : eventId);
       setGuestListKPIs(kpis);
     } catch (error) {
       console.error("Error fetching guest list KPIs:", error);

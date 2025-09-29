@@ -77,7 +77,7 @@ export const FigmaInspector: React.FC<FigmaInspectorProps> = ({
         fill: preset.fill,
         stroke: preset.stroke
       }
-    });
+    } as any);
   }, [selectedElement, onUpdateElement]);
 
   const NumberInput = ({ 
@@ -416,9 +416,9 @@ export const FigmaInspector: React.FC<FigmaInspectorProps> = ({
                 <input
                   type="number"
                   value={(selectedElement as ZoneElement).capacity || ''}
-                  onChange={(e) => onUpdateElement(selectedElement.id, { 
-                    capacity: parseInt(e.target.value) || undefined 
-                  })}
+                  onChange={(e) => onUpdateElement(selectedElement.id, {
+                    capacity: parseInt(e.target.value) || undefined
+                  } as any)}
                   className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
                   placeholder="Sin límite"
                   min="0"
@@ -434,9 +434,9 @@ export const FigmaInspector: React.FC<FigmaInspectorProps> = ({
                 <input
                   type="number"
                   value={(selectedElement as ZoneElement).price || ''}
-                  onChange={(e) => onUpdateElement(selectedElement.id, { 
-                    price: parseFloat(e.target.value) || undefined 
-                  })}
+                  onChange={(e) => onUpdateElement(selectedElement.id, {
+                    price: parseFloat(e.target.value) || undefined
+                  } as any)}
                   className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
                   placeholder="0.00"
                   min="0"

@@ -74,7 +74,7 @@ export const useSubscriptions = (options: UseSubscriptionsOptions = {}) => {
       }
 
       if (result.error) {
-        throw new Error(result.error.message || 'Error fetching subscriptions');
+        throw new Error((result.error as any)?.message || 'Error fetching subscriptions');
       }
 
       setSubscriptions(result.data || []);
@@ -93,7 +93,7 @@ export const useSubscriptions = (options: UseSubscriptionsOptions = {}) => {
     try {
       const result = await getSubscriptionStats();
       if (result.error) {
-        throw new Error(result.error.message || 'Error fetching stats');
+        throw new Error((result.error as any)?.message || 'Error fetching stats');
       }
       setStats(result.data);
     } catch (err) {
@@ -109,7 +109,7 @@ export const useSubscriptions = (options: UseSubscriptionsOptions = {}) => {
     try {
       const result = await createSubscription(data);
       if (result.error) {
-        throw new Error(result.error.message || 'Error creating subscription');
+        throw new Error((result.error as any)?.message || 'Error creating subscription');
       }
 
       // Refresh data
@@ -134,7 +134,7 @@ export const useSubscriptions = (options: UseSubscriptionsOptions = {}) => {
     try {
       const result = await updateSubscription(id, data);
       if (result.error) {
-        throw new Error(result.error.message || 'Error updating subscription');
+        throw new Error((result.error as any)?.message || 'Error updating subscription');
       }
 
       // Refresh data
@@ -159,7 +159,7 @@ export const useSubscriptions = (options: UseSubscriptionsOptions = {}) => {
     try {
       const result = await deleteSubscription(id);
       if (result.error) {
-        throw new Error(result.error.message || 'Error deleting subscription');
+        throw new Error((result.error as any)?.message || 'Error deleting subscription');
       }
 
       // Refresh data

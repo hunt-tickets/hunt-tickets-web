@@ -69,7 +69,7 @@ export default function StatisticsCard2() {
               {/* Main Value */}
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-bold text-white leading-none">
-                  {stat.format ? stat.format(stat.value) : stat.prefix + formatNumber(stat.value) + stat.suffix}
+                  {(stat as any).format ? (stat as any).format(stat.value) : stat.prefix + formatNumber(stat.value) + stat.suffix}
                 </span>
                 <Badge className="bg-white/15 hover:bg-white/25 font-medium text-xs text-white border-0 px-2 py-1">
                   {stat.delta > 0 ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
@@ -81,8 +81,8 @@ export default function StatisticsCard2() {
               <div className="flex items-center justify-between pt-3 border-t border-white/10">
                 <span className="text-xs text-white/60 font-medium">Mes anterior</span>
                 <span className="text-sm text-white/90 font-semibold">
-                  {stat.lastFormat
-                    ? stat.lastFormat(stat.lastMonth)
+                  {(stat as any).lastFormat
+                    ? (stat as any).lastFormat(stat.lastMonth)
                     : stat.prefix + formatNumber(stat.lastMonth) + stat.suffix}
                 </span>
               </div>

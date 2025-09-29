@@ -18,7 +18,7 @@ interface FigmaCanvasProps {
   onCreate: (element: FigmaElement) => void;
   onUpdate: (elementId: string, updates: Partial<FigmaElement>) => void;
   onSelectionChange: (elementIds: string[]) => void;
-  onViewportChange: (viewport: Partial<typeof document.viewport>) => void;
+  onViewportChange: (viewport: Partial<{ zoom: number; offsetX: number; offsetY: number; }>) => void;
   onStateChange: (state: Partial<FigmaEditorState>) => void;
 }
 

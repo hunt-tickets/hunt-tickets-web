@@ -1024,7 +1024,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.rowLines || 1}
+                              value={(element as any).rowLines || 1}
                               onChange={(e) => {
                                 setMapElements(mapElements.map(el => 
                                   el.id === selectedElement 
@@ -1043,7 +1043,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.seatWidth || 14}
+                              value={(element as any).seatWidth || 14}
                               onChange={(e) => {
                                 setMapElements(mapElements.map(el => 
                                   el.id === selectedElement 
@@ -1058,7 +1058,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.seatHeight || 12}
+                              value={(element as any).seatHeight || 12}
                               onChange={(e) => {
                                 setMapElements(mapElements.map(el => 
                                   el.id === selectedElement 
@@ -1077,13 +1077,13 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.seatSpacing || 16}
+                              value={(element as any).seatSpacing || 16}
                               onChange={(e) => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
                                     ? { ...el, seatSpacing: parseInt(e.target.value) || 16 }
                                     : el
-                                ));
+                                ) as any);
                               }}
                             />
                           </div>
@@ -1092,13 +1092,13 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.startNumber || 1}
+                              value={(element as any).startNumber || 1}
                               onChange={(e) => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
                                     ? { ...el, startNumber: parseInt(e.target.value) || 1 }
                                     : el
-                                ));
+                                ) as any);
                               }}
                             />
                           </div>
@@ -1109,13 +1109,13 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                           <label className="block text-white/60 text-sm mb-2">Numbering Pattern</label>
                           <select 
                             className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                            value={element.numberingPattern || 'sequential'}
+                            value={(element as any).numberingPattern || 'sequential'}
                             onChange={(e) => {
-                              setMapElements(mapElements.map(el => 
-                                el.id === selectedElement 
+                              setMapElements(mapElements.map((el: any) =>
+                                el.id === selectedElement
                                   ? { ...el, numberingPattern: e.target.value }
                                   : el
-                              ));
+                              ) as any);
                             }}
                           >
                             <option value="sequential">Sequential (1,2,3...)</option>
@@ -1132,11 +1132,11 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
                               value={(element as any).configuration?.groupSize || 0}
                               onChange={(e) => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
-                                    ? { ...el, configuration: { ...el.configuration, groupSize: parseInt(e.target.value) || 0 } }
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
+                                    ? { ...el, configuration: { ...(el as any).configuration, groupSize: parseInt(e.target.value) || 0 } }
                                     : el
-                                ));
+                                ) as any);
                               }}
                             />
                           </div>
@@ -1147,11 +1147,11 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
                               value={(element as any).configuration?.gap || 0}
                               onChange={(e) => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
-                                    ? { ...el, configuration: { ...el.configuration, gap: parseInt(e.target.value) || 0 } }
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
+                                    ? { ...el, configuration: { ...(el as any).configuration, gap: parseInt(e.target.value) || 0 } }
                                     : el
-                                ));
+                                ) as any);
                               }}
                             />
                           </div>
@@ -1166,11 +1166,11 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                               className="w-4 h-4 text-blue-600 bg-white/5 border-white/10 rounded focus:ring-blue-500"
                               checked={(element as any).configuration?.curved || false}
                               onChange={(e) => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
-                                    ? { ...el, configuration: { ...el.configuration, curved: e.target.checked } }
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
+                                    ? { ...el, configuration: { ...(el as any).configuration, curved: e.target.checked } }
                                     : el
-                                ));
+                                ) as any);
                               }}
                             />
                           </div>
@@ -1185,11 +1185,11 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                                 className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
                                 value={(element as any).configuration?.curvature || 0}
                                 onChange={(e) => {
-                                  setMapElements(mapElements.map(el => 
-                                    el.id === selectedElement 
-                                      ? { ...el, configuration: { ...el.configuration, curvature: parseFloat(e.target.value) } }
+                                  setMapElements(mapElements.map((el: any) =>
+                                    el.id === selectedElement
+                                      ? { ...el, configuration: { ...(el as any).configuration, curvature: parseFloat(e.target.value) } }
                                       : el
-                                  ));
+                                  ) as any);
                                 }}
                               />
                               <div className="text-white/40 text-xs mt-1">
@@ -1206,30 +1206,30 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="checkbox" 
                               className="w-4 h-4 text-blue-600 bg-white/5 border-white/10 rounded focus:ring-blue-500"
-                              checked={element.numbering?.show !== false}
+                              checked={(element as any).numbering?.show !== false}
                               onChange={(e) => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
-                                    ? { ...el, numbering: { ...el.numbering, show: e.target.checked } }
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
+                                    ? { ...el, numbering: { ...(el as any).numbering, show: e.target.checked } }
                                     : el
-                                ));
+                                ) as any);
                               }}
                             />
                           </div>
                           
-                          {element.numbering?.show !== false && (
+                          {(element as any).numbering?.show !== false && (
                             <>
                               <div>
                                 <label className="block text-white/60 text-sm mb-2">Number Position</label>
                                 <select 
                                   className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                                  value={element.numbering?.position || 'center'}
+                                  value={(element as any).numbering?.position || 'center'}
                                   onChange={(e) => {
-                                    setMapElements(mapElements.map(el => 
-                                      el.id === selectedElement 
-                                        ? { ...el, numbering: { ...el.numbering, position: e.target.value } }
+                                    setMapElements(mapElements.map((el: any) =>
+                                      el.id === selectedElement
+                                        ? { ...el, numbering: { ...(el as any).numbering, position: e.target.value } }
                                         : el
-                                    ));
+                                    ) as any);
                                   }}
                                 >
                                   <option value="center">Center</option>
@@ -1245,13 +1245,13 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                                   min="6" 
                                   max="16"
                                   className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                                  value={element.numbering?.fontSize || 8}
+                                  value={(element as any).numbering?.fontSize || 8}
                                   onChange={(e) => {
-                                    setMapElements(mapElements.map(el => 
-                                      el.id === selectedElement 
-                                        ? { ...el, numbering: { ...el.numbering, fontSize: parseInt(e.target.value) || 8 } }
+                                    setMapElements(mapElements.map((el: any) =>
+                                      el.id === selectedElement
+                                        ? { ...el, numbering: { ...(el as any).numbering, fontSize: parseInt(e.target.value) || 8 } }
                                         : el
-                                    ));
+                                    ) as any);
                                   }}
                                 />
                               </div>
@@ -1270,30 +1270,30 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                           className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
                           value={element.seats || 0}
                           onChange={(e) => {
-                            setMapElements(mapElements.map(el => 
-                              el.id === selectedElement 
+                            setMapElements(mapElements.map((el: any) =>
+                              el.id === selectedElement
                                 ? { ...el, seats: parseInt(e.target.value) || 0 }
                                 : el
-                            ));
+                            ) as any);
                           }}
                         />
                       </div>
                     )}
 
                     {/* Radius (for tables) */}
-                    {element.radius && (
+                    {(element as any).radius && (
                       <div>
                         <label className="block text-white/60 text-sm mb-2">Radius</label>
                         <input 
                           type="number" 
                           className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                          value={element.radius}
+                          value={(element as any).radius}
                           onChange={(e) => {
-                            setMapElements(mapElements.map(el => 
-                              el.id === selectedElement 
+                            setMapElements(mapElements.map((el: any) =>
+                              el.id === selectedElement
                                 ? { ...el, radius: parseInt(e.target.value) || 0 }
                                 : el
-                            ));
+                            ) as any);
                           }}
                         />
                       </div>

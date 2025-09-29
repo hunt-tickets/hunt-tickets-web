@@ -79,14 +79,14 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonRootProps>(
               hidden: loading,
               "text-body font-body": size === "small",
               "text-heading-3 font-heading-3": size === "large",
-              "text-black": variant === "inverse",
-              "text-error-700":
-                variant === "destructive-tertiary" ||
-                variant === "destructive-secondary",
               "text-black":
+                variant === "inverse" ||
                 variant === "neutral-tertiary" ||
                 variant === "neutral-secondary" ||
                 variant === "neutral-primary",
+              "text-error-700":
+                variant === "destructive-tertiary" ||
+                variant === "destructive-secondary",
               "text-brand-700":
                 variant === "brand-tertiary" || variant === "brand-secondary",
             }
@@ -127,14 +127,14 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonRootProps>(
                 hidden: loading,
                 "text-caption-bold font-caption-bold": size === "small",
                 "text-body-bold font-body-bold": size === "large",
-                "text-black": variant === "inverse",
-                "text-error-700":
-                  variant === "destructive-tertiary" ||
-                  variant === "destructive-secondary",
                 "text-black":
+                  variant === "inverse" ||
                   variant === "neutral-tertiary" ||
                   variant === "neutral-secondary" ||
                   variant === "neutral-primary",
+                "text-error-700":
+                  variant === "destructive-tertiary" ||
+                  variant === "destructive-secondary",
                 "text-brand-700":
                   variant === "brand-tertiary" || variant === "brand-secondary",
               }
@@ -149,14 +149,14 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonRootProps>(
             {
               "text-body font-body": size === "small",
               "text-heading-3 font-heading-3": size === "large",
-              "text-black": variant === "inverse",
-              "text-error-700":
-                variant === "destructive-tertiary" ||
-                variant === "destructive-secondary",
               "text-black":
+                variant === "inverse" ||
                 variant === "neutral-tertiary" ||
                 variant === "neutral-secondary" ||
                 variant === "neutral-primary",
+              "text-error-700":
+                variant === "destructive-tertiary" ||
+                variant === "destructive-secondary",
               "text-brand-700":
                 variant === "brand-tertiary" || variant === "brand-secondary",
             }
