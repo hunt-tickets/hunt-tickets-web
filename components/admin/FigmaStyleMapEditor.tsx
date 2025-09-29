@@ -678,8 +678,8 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                       
                       // Apply curvature if enabled
                       let adjustedY = lineY;
-                      if (element.configuration?.curved && element.configuration?.curvature) {
-                        const curvature = element.configuration.curvature;
+                      if (el.configuration?.curved && el.configuration?.curvature) {
+                        const curvature = el.configuration.curvature;
                         const centerPoint = seatsPerRow / 2;
                         const distanceFromCenter = Math.abs(i - centerPoint);
                         adjustedY += (distanceFromCenter * curvature);
@@ -687,7 +687,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                       
                       // Calculate seat number based on pattern
                       let seatNumber = startNumber + i + (line * seatsPerRow);
-                      if (element.numberingPattern === 'odd-even') {
+                      if (el.numberingPattern === 'odd-even') {
                         seatNumber = line % 2 === 0 ? 
                           (startNumber + i * 2) : 
                           (startNumber + 1 + i * 2);
@@ -706,15 +706,15 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             rx="2"
                             className="cursor-pointer hover:opacity-80"
                           />
-                          {element.numbering?.show && (
+                          {el.numbering?.show && (
                             <text
                               x={seatX + seatWidth / 2}
-                              y={adjustedY + (element.numbering.position === 'center' ? seatHeight / 2 : 
-                                   element.numbering.position === 'bottom' ? seatHeight + 8 : -2)}
+                              y={adjustedY + (el.numbering.position === 'center' ? seatHeight / 2 :
+                                   el.numbering.position === 'bottom' ? seatHeight + 8 : -2)}
                               textAnchor="middle"
                               dominantBaseline="middle"
-                              fill={element.numbering.color || '#ffffff'}
-                              fontSize={element.numbering.fontSize || 8}
+                              fill={el.numbering.color || '#ffffff'}
+                              fontSize={el.numbering.fontSize || 8}
                               className="pointer-events-none select-none"
                             >
                               {seatNumber}
@@ -727,10 +727,11 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                   return allSeats;
                 };
 
-                const totalWidth = (element.seatsPerRow * element.seatSpacing) + 
-                  (element.configuration?.groupSize > 0 ? 
-                    Math.floor(element.seatsPerRow / element.configuration.groupSize) * element.configuration.gap : 0);
-                const totalHeight = (element.rowLines * (element.seatHeight + 4));
+                const elAny = element as any;
+                const totalWidth = (elAny.seatsPerRow * elAny.seatSpacing) +
+                  (elAny.configuration?.groupSize > 0 ?
+                    Math.floor(elAny.seatsPerRow / elAny.configuration.groupSize) * elAny.configuration.gap : 0);
+                const totalHeight = (elAny.rowLines * (elAny.seatHeight + 4));
 
                 return (
                   <g key={element.id} onClick={() => setSelectedElement(element.id)} onMouseDown={(e) => handleElementMouseDown(element.id, e)}>
@@ -765,7 +766,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                       fontWeight="bold"
                       className="pointer-events-none select-none"
                     >
-                      {element.rowLetter || element.name?.charAt(element.name.length - 1) || 'A'}
+                      {elAny.rowLetter || element.name?.charAt(element.name.length - 1) || 'A'}
                     </text>
                     {renderSeats()}
                   </g>
@@ -773,12 +774,13 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
               }
 
               if (element.type === 'table') {
+                const elTable = element as any;
                 return (
                   <g key={element.id} onClick={() => setSelectedElement(element.id)} onMouseDown={(e) => handleElementMouseDown(element.id, e)}>
                     <circle
                       cx={element.x}
                       cy={element.y}
-                      r={element.radius * 0.6}
+                      r={elTable.radius * 0.6}
                       fill="#92400e"
                       stroke={isSelected ? "#ffffff" : "#451a03"}
                       strokeWidth={isSelected ? 3 : 2}
@@ -960,11 +962,11 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <button
                               key={color}
                               onClick={() => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
                                     ? { ...el, color }
                                     : el
-                                ));
+                                ) as any);
                               }}
                               className={`w-8 h-8 rounded-lg border-2 transition-all ${
                                 element.color === color ? 'border-white' : 'border-white/20'
@@ -986,9 +988,9 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                           <label className="block text-white/60 text-sm mb-2">Row Letter</label>
                           <input 
                             type="text" 
-                            maxLength="2"
+                            maxLength={2}
                             className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                            value={element.rowLetter || 'A'}
+                            value={(element as any).rowLetter || 'A'}
                             onChange={(e) => {
                               const letter = e.target.value.toUpperCase();
                               setMapElements(mapElements.map(el => 
@@ -1007,13 +1009,13 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.seatsPerRow || 10}
+                              value={(element as any).seatsPerRow || 10}
                               onChange={(e) => {
-                                setMapElements(mapElements.map(el => 
-                                  el.id === selectedElement 
+                                setMapElements(mapElements.map((el: any) =>
+                                  el.id === selectedElement
                                     ? { ...el, seatsPerRow: parseInt(e.target.value) || 1 }
                                     : el
-                                ));
+                                ) as any);
                               }}
                             />
                           </div>
@@ -1128,7 +1130,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.configuration?.groupSize || 0}
+                              value={(element as any).configuration?.groupSize || 0}
                               onChange={(e) => {
                                 setMapElements(mapElements.map(el => 
                                   el.id === selectedElement 
@@ -1143,7 +1145,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="number" 
                               className="w-full h-9 px-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
-                              value={element.configuration?.gap || 0}
+                              value={(element as any).configuration?.gap || 0}
                               onChange={(e) => {
                                 setMapElements(mapElements.map(el => 
                                   el.id === selectedElement 
@@ -1162,7 +1164,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                             <input 
                               type="checkbox" 
                               className="w-4 h-4 text-blue-600 bg-white/5 border-white/10 rounded focus:ring-blue-500"
-                              checked={element.configuration?.curved || false}
+                              checked={(element as any).configuration?.curved || false}
                               onChange={(e) => {
                                 setMapElements(mapElements.map(el => 
                                   el.id === selectedElement 
@@ -1172,7 +1174,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                               }}
                             />
                           </div>
-                          {element.configuration?.curved && (
+                          {(element as any).configuration?.curved && (
                             <div>
                               <label className="block text-white/60 text-sm mb-2">Curvature</label>
                               <input 
@@ -1181,7 +1183,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                                 max="10" 
                                 step="0.5"
                                 className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                                value={element.configuration?.curvature || 0}
+                                value={(element as any).configuration?.curvature || 0}
                                 onChange={(e) => {
                                   setMapElements(mapElements.map(el => 
                                     el.id === selectedElement 
@@ -1191,7 +1193,7 @@ export default function FigmaStyleMapEditor({ eventId, activeTab }: FigmaStyleMa
                                 }}
                               />
                               <div className="text-white/40 text-xs mt-1">
-                                Curvature: {element.configuration?.curvature || 0}
+                                Curvature: {(element as any).configuration?.curvature || 0}
                               </div>
                             </div>
                           )}
